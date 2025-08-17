@@ -12,8 +12,8 @@ switchEl.addEventListener('change', () => {
 
 // ------- Search (single implementation) -------
 const search = document.getElementById('search');
-const wfCards = Array.from(document.querySelectorAll('.wf-card'));
-const sections = Array.from(document.querySelectorAll('section'));
+const wfCards = Array.from(document.querySelectorAll('.content .wf-card'));
+const sections = Array.from(document.querySelectorAll('.content section'));
 const noResultsEl = document.getElementById('noResults');
 
 function filter(term) {
@@ -92,4 +92,37 @@ function toggleCard(card) {
 wfCards.forEach(card => {
   const head = card.querySelector('.wf-head');
   if (head) head.addEventListener('click', () => toggleCard(card));
+});
+/* --- Sidebar collapse toggle (LEFT sidebar) --- */
+const pageEl = document.querySelector('.page');
+const sideToggle = document.querySelector('.side-toggle');
+
+function applySidebarCollapsed(collapsed) {
+  pageEl.classList.toggle('sidebar-collapsed', collapsed);
+  if (sideToggle) sideToggle.setAttribute('aria-expanded', String(!collapsed));
+  localStorage.setItem('sidebarCollapsed', collapsed ? '1' : '0');
+}
+
+// Initialize from localStorage on desktop only
+const savedSidebar = localStorage.getItem('sidebarCollapsed');
+const isNarrow = window.matchMedia('(max-width: 1024px)').matches;
+if (savedSidebar === '1' && !isNarrow) applySidebarCollapsed(true);
+
+// Toggle on click
+if (sideToggle) {
+  sideToggle.addEventListener('click', () => {
+    const nowCollapsed = !pageEl.classList.contains('sidebar-collapsed');
+    applySidebarCollapsed(nowCollapsed);
+  });
+}
+
+// Keep behavior sensible across breakpoint changes
+window.addEventListener('resize', () => {
+  const narrow = window.matchMedia('(max-width: 1024px)').matches;
+  if (narrow) {
+    applySidebarCollapsed(false); // always expanded on narrow screens
+  } else {
+    const saved = localStorage.getItem('sidebarCollapsed') === '1';
+    applySidebarCollapsed(saved);
+  }
 });

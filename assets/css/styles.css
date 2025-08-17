@@ -32,6 +32,12 @@
   --bg: var(--bg-2);
   --bg-soft: var(--bg-1);
   --eule-blue: var(--teal);
+
+  --search-gap-top: 10px; /* keeps search & sidebar aligned */
+    --layout-gap: 24px;
+  --sidebar-w: 320px;
+  --sidebar-collapsed-w: 52px;   /* width when collapsed (shows just the toggle/label) */
+
 }
 
 .light {
@@ -115,7 +121,7 @@ img { max-width: 100%; height: auto; }
   justify-content: center;   /* center the brand line */
   gap: 16px;
   flex-wrap: wrap;
-  padding: 24px 0 8px;
+  padding: 0px 0 8px;
 }
 
 /* Brand centered across the row */
@@ -177,7 +183,7 @@ nav.primary { display:flex; justify-content:center; flex-wrap:wrap; gap:12px; ma
 .navbtn:hover { transform: translateY(-1px); background: rgba(255,255,255,.06); border-color: rgba(255,255,255,.18); }
 .navbtn:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 
-.search { margin: 10px 0 24px 0; display:flex; gap:10px; }
+.search { margin: var(--search-gap-top) 0 24px 0; display:flex; gap:10px; }
 .search input {
   flex: 1; padding: 14px 16px; font-size: 1.05em; border-radius: 12px;
   border: 1px solid var(--stroke);
@@ -255,4 +261,223 @@ footer { color: var(--muted); margin-top: 26px; font-size: .95em; border-top: 1p
   background: rgba(255,255,255,.04);
   color: var(--muted);
   display: inline-block;
+}
+/* Grid: main content + sidebar. Sidebar column uses its own width so we can animate it */
+.layout {
+  display: grid;
+  grid-template-columns: 1fr auto;   /* main grows; sidebar width is set on .sidebar */
+  gap: var(--layout-gap);
+  align-items: start;
+}
+
+/* Main column */
+.content { min-width: 0; }
+
+/* Sidebar column flush with right edge of the container (not floating) */
+.sidebar {
+  width: var(--sidebar-w);
+  transition: width .25s ease;
+  align-self: start;
+  margin-top: var(--search-gap-top);  /* aligns top with search */
+  position: sticky;
+  top: 16px;                           /* stick under header as you scroll */
+  overflow: visible;                   /* let the toggle sit inside nicely */
+}
+
+/* Panel inside the sidebar */
+.side-panel.glass { padding: 16px; border-radius: 16px; }
+.side-title { margin: 0 0 10px; font-size: 18px; color: var(--text); }
+
+/* Text-only links */
+.side-links { display: flex; flex-direction: column; gap: 8px; }
+.side-link {
+  display: block;
+  padding: 2px 0;
+  border: 0; background: transparent; box-shadow: none;
+  font-size: 16px;
+  color: var(--accent); text-decoration: none;
+  transition: color .15s ease, opacity .15s ease;
+}
+.side-link:hover { text-decoration: underline; }
+.side-link:active { opacity: .85; }
+
+/* Toggle button (inside sidebar, top-right) */
+.side-toggle {
+  appearance: none;
+  border: 1px solid var(--stroke);
+  border-radius: 10px;
+  background: rgba(255,255,255,.06);
+  color: var(--text);
+  height: 36px; width: 36px;
+  display: grid; place-items: center;
+  cursor: pointer;
+  box-shadow: 0 6px 18px var(--shadow);
+  transition: background .15s ease, transform .08s ease;
+  margin-left: auto;          /* push it to the right inside side-panel header area */
+}
+.side-toggle:hover { background: rgba(255,255,255,.1); }
+.side-toggle:active { transform: translateY(1px); }
+
+/* Optionally hide the toggle label text and use an icon-like character */
+.side-toggle .lbl { font-size: 18px; line-height: 1; }
+
+/* Collapsed state (applied on the layout wrapper) */
+.layout.sidebar-collapsed .sidebar {
+  width: var(--sidebar-collapsed-w);
+}
+
+/* Hide panel contents when collapsed, keep only the toggle visible */
+.layout.sidebar-collapsed .side-title,
+.layout.sidebar-collapsed .side-links {
+  display: none;
+}
+
+/* Keep the glass box compact when collapsed */
+.layout.sidebar-collapsed .side-panel.glass {
+  padding: 8px;
+  display: grid;
+  justify-items: end;
+}
+
+/* Responsive: stack columns on tablets/phones and show full panel content */
+@media (max-width: 1024px) {
+  .layout { grid-template-columns: 1fr; }
+  .sidebar { position: static; width: 100%; margin-top: 0; }
+  .layout.sidebar-collapsed .sidebar { width: 100%; }
+  .layout.sidebar-collapsed .side-title,
+  .layout.sidebar-collapsed .side-links { display: block; }
+  .side-toggle { display: none; } /* no need to collapse on narrow screens */
+}
+/* ===== Left sidebar, full-bleed, collapsible (clean) ===== */
+:root{
+  --layout-gap: 24px;
+  --sidebar-w: 320px;
+  --sidebar-collapsed-w: 52px;
+}
+
+/* Grid: left sidebar + main content */
+.page{
+  display: grid;
+  grid-template-columns: var(--sidebar-w) minmax(0, 1fr);
+  gap: var(--layout-gap);
+  align-items: start;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  transition: grid-template-columns .2s ease;
+}
+.page.sidebar-collapsed{
+  grid-template-columns: var(--sidebar-collapsed-w) minmax(0, 1fr);
+}
+
+/* Center the content column within the right grid cell */
+.page > .container{
+  justify-self: center;
+  width: min(75%, 1200px);
+}
+
+/* Left rail: attached to window edge, full height */
+.sidebar{
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  width: var(--sidebar-w);
+  margin: 0;
+  transition: width .25s ease;
+}
+.page.sidebar-collapsed .sidebar{ width: var(--sidebar-collapsed-w); }
+
+/* Sidebar panel visuals */
+.side-panel.glass{
+  height: 100%;
+  padding: 16px;
+  border-radius: 0 0 0 0; /* flush left edge */
+}
+
+/* Hide content when collapsed (keep just the toggle) */
+.page.sidebar-collapsed .side-title,
+.page.sidebar-collapsed .side-links{ display: none; }
+.page.sidebar-collapsed .side-panel.glass{
+  padding: 8px;
+  display: grid;
+  justify-items: end;
+}
+
+/* Icon-only toggle (no box) */
+.side-toggle{
+  appearance: none;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  color: var(--text);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: px;          /* keeps a decent hit area */
+  margin-left: auto;
+  cursor: pointer;
+  transition: transform .08s ease, color .15s ease, opacity .15s ease;
+}
+
+.side-toggle:hover{ color: var(--accent); }
+.side-toggle:active{ transform: scale(0.96); }
+
+/* Accessible focus ring */
+.side-toggle:focus-visible{
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 6px;    /* just for the focus ring shape */
+}
+
+/* The “≡” icon */
+.side-toggle .lbl{
+  font-size: 20px;
+  line-height: 1;
+  font-weight: 600;
+}
+
+/* Text-only links (keep) */
+.side-links{ display: flex; flex-direction: column; gap: 8px; }
+.side-link{
+  display: block;
+  padding: 2px 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  font-size: 16px;
+  color: var(--accent);
+  text-decoration: none;
+  transition: color .15s ease, opacity .15s ease;
+}
+.side-link:hover{ text-decoration: underline; }
+.side-link:active{ opacity: .85; }
+
+/* Responsive: stack; content full-width; rounded panel; hide toggle */
+@media (max-width: 1024px){
+  .page{ grid-template-columns: 1fr; }
+  .page > .container{ justify-self: stretch; width: 100%; }
+  .sidebar{ position: static; height: auto; width: 100%; }
+  .side-panel.glass{ border-radius: 16px; }
+  .side-toggle{ display: none; }
+}
+/* 1) Keep card background inside the border */
+.wf-card { background-clip: padding-box; }
+
+/* 2) Pull the overlay in by 1px so it never hits the border */
+.wf-card::before{
+  inset: 1px;                               /* was: inset: 0 */
+  border-radius: calc(var(--radius) - 1px); /* match the inset */
+}
+
+/* 3) Make sure a collapsed body can’t draw a divider */
+.wf-body{
+  overflow: hidden;
+  border-top: 0 !important; /* in case an old rule adds one */
+}
+
+/* 4) Nudge GPU to avoid subpixel hairlines on some setups */
+.wf-card,
+.wf-card::before{
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
