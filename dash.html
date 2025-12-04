@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="et">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Project Distribution Dashboard</title>
+    <title>Töölaud • EULE</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     
@@ -13,11 +13,7 @@
             theme: {
                 extend: {
                     colors: {
-                        gray: {
-                            900: '#111827',
-                            800: '#1f2937',
-                            700: '#374151',
-                        }
+                        gray: { 900: '#111827', 800: '#1f2937', 700: '#374151' }
                     }
                 }
             }
@@ -27,201 +23,187 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
-        /* Smooth transition for theme switching */
-        body, div, nav, table, tr, td, th, input, select {
+        /* Smooth transitions */
+        body, div, nav, table, tr, td, th, input, select, aside {
             transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.4s ease-out forwards;
         }
     </style>
 </head>
-<body class="bg-gray-50 text-gray-800 font-sans dark:bg-gray-900 dark:text-gray-100">
+<body class="bg-gray-100 text-gray-800 font-sans dark:bg-gray-900 dark:text-gray-100 overflow-hidden flex h-screen">
 
-    <nav class="bg-white shadow mb-8 dark:bg-gray-800 dark:border-gray-700">
-        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
-            <h1 class="text-2xl font-bold text-blue-600 dark:text-blue-400">Team Dashboard</h1>
-            <div class="flex items-center gap-2">
-                
-                <button onclick="switchView('list')" class="px-4 py-2 bg-blue-100 text-blue-600 rounded hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-200 dark:hover:bg-blue-800">Data & Edit</button>
-                <button onclick="switchView('visuals')" class="px-4 py-2 bg-purple-100 text-purple-600 rounded hover:bg-purple-200 dark:bg-purple-900 dark:text-purple-200 dark:hover:bg-purple-800">Visuals</button>
-                
-                <button onclick="toggleTheme()" class="ml-4 p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none">
-                    <svg id="sunIcon" class="w-6 h-6 hidden dark:block text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-                    <svg id="moonIcon" class="w-6 h-6 block dark:hidden text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+    <div class="flex-1 flex flex-col h-screen overflow-hidden relative">
+        
+        <div class="absolute inset-0 z-0 opacity-10 pointer-events-none bg-gradient-to-br from-blue-200 to-purple-200 dark:from-blue-900 dark:to-purple-900"></div>
+
+        <header class="h-16 bg-white/90 dark:bg-gray-800/90 backdrop-blur shadow-sm z-20 flex items-center justify-between px-6 border-b border-gray-200 dark:border-gray-700">
+            <div class="flex items-center gap-4">
+                <a href="index.html" class="flex items-center gap-3 hover:opacity-80 transition" title="Tagasi pealehele">
+                    <img src="assets/logos/eule-logo.png" alt="Logo" class="h-8 w-auto object-contain"> 
+                    <span class="text-lg font-bold text-gray-800 dark:text-gray-100">EULE Töölaud</span>
+                </a>
+            </div>
+
+            <div class="flex items-center gap-4">
+                <div class="flex bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
+                    <button onclick="switchView('visuals')" id="btnVisuals" class="px-4 py-1.5 text-sm font-medium rounded-md bg-white shadow text-blue-600 dark:bg-gray-600 dark:text-white transition-all">Visuaalid</button>
+                    <button onclick="switchView('list')" id="btnList" class="px-4 py-1.5 text-sm font-medium rounded-md text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white transition-all">Andmed</button>
+                </div>
+
+                <button onclick="toggleTheme()" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition" title="Vaheta teemat">
+                    <svg class="w-5 h-5 hidden dark:block text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                    <svg class="w-5 h-5 block dark:hidden text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
                 </button>
             </div>
-        </div>
-    </nav>
+        </header>
 
-    <div class="container mx-auto px-6">
+        <main class="flex-1 overflow-y-auto p-6 z-10 scroll-smooth">
+            <div class="max-w-7xl mx-auto">
+                
+                <div id="visualsView" class="animate-fade-in pb-12">
+                    <h2 class="text-2xl font-bold mb-6 text-gray-800 dark:text-white">Tööjaotus ja Statistika</h2>
+                    <div class="flex flex-col gap-6">
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+                                <h3 class="font-bold mb-4 text-gray-600 dark:text-gray-300 text-sm uppercase">Projektid Suuruse Järgi</h3>
+                                <div class="h-64"><canvas id="sizeChart"></canvas></div>
+                            </div>
+                            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+                                <h3 class="font-bold mb-4 text-gray-600 dark:text-gray-300 text-sm uppercase">Kaalutud Töökoormus (Punktid)</h3>
+                                <div class="h-64"><canvas id="userChart"></canvas></div>
+                            </div>
+                        </div>
+                        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+                            <h3 class="font-bold mb-4 text-gray-600 dark:text-gray-300 text-sm uppercase">Projektide Arv Kasutaja Kohta</h3>
+                            <div class="h-64"><canvas id="countChart"></canvas></div>
+                        </div>
+                    </div>
+                </div>
 
-        <div id="listView">
-            
-            <div class="bg-white rounded-lg shadow-md p-6 mb-8 border-l-4 border-blue-500 dark:bg-gray-800 dark:border-blue-400">
-                <h2 id="formTitle" class="text-xl font-bold mb-4 text-gray-800 dark:text-white">Add New Project</h2>
-                <form id="projectForm" class="grid grid-cols-1 md:grid-cols-4 gap-6">
-                    <input type="hidden" name="ID" id="idField">
-
-                    <div class="md:col-span-2">
-                        <label class="block text-sm font-bold mb-2 dark:text-gray-300">Project Name</label>
-                        <input name="Project Name" class="w-full p-2 border rounded bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400" type="text" placeholder="Project Title" required>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-bold mb-2 dark:text-gray-300">Stage</label>
-                        <select name="Stage" class="w-full p-2 border rounded bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                            <option>EP</option>
-                            <option>PP</option>
-                            <option>TP</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-bold mb-2 dark:text-gray-300">Size</label>
-                        <select name="Size" class="w-full p-2 border rounded bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                            <option>XS</option>
-                            <option>S</option>
-                            <option>M</option>
-                            <option>L</option>
-                            <option>XL</option>
-                        </select>
-                    </div>
-
-                    <datalist id="existingUsers"></datalist>
-
-                    <div>
-                        <label class="block text-sm font-bold mb-2 text-blue-600 dark:text-blue-400">User EL</label>
-                        <input name="User EL" list="existingUsers" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white" type="text" placeholder="Select or type...">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-bold mb-2 text-green-600 dark:text-green-400">User EN</label>
-                        <input name="User EN" list="existingUsers" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white" type="text" placeholder="Select or type...">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-bold mb-2 text-purple-600 dark:text-purple-400">User EA</label>
-                        <input name="User EA" list="existingUsers" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white" type="text" placeholder="Select or type...">
-                    </div>
+                <div id="listView" class="hidden animate-fade-in">
                     
-                    <div>
-                         <label class="block text-sm font-bold mb-2 dark:text-gray-300">Status</label>
-                        <select name="Status" class="w-full p-2 border rounded bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                            <option>Töös</option>
-                            <option>Ekspertiisis</option>
-                            <option>Valmis</option>
-                            <option>Ootel</option>
-                        </select>
-                    </div>
-
-                    <div class="md:col-span-2">
-                         <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm font-bold mb-2 dark:text-gray-300">Start Date</label>
-                                <input name="Start Date" id="startDate" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white" type="date">
+                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-8">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 id="formTitle" class="text-xl font-bold text-gray-800 dark:text-white flex items-center gap-2"><span>➕</span> Lisa Uus Projekt</h2>
+                        </div>
+                        <form id="projectForm" class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                            <input type="hidden" name="ID" id="idField">
+                            <div class="md:col-span-2">
+                                <label class="block text-xs uppercase font-bold text-gray-500 dark:text-gray-400 mb-1">Projekti Nimi</label>
+                                <input name="Project Name" class="w-full p-2.5 border border-gray-300 dark:border-gray-600 rounded bg-gray-50 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none" type="text" placeholder="Sisesta nimi..." required>
                             </div>
                             <div>
-                                <label class="block text-sm font-bold mb-2 dark:text-gray-300">End Date</label>
-                                <input name="End Date" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white" type="date">
+                                <label class="block text-xs uppercase font-bold text-gray-500 dark:text-gray-400 mb-1">Staadium</label>
+                                <select name="Stage" class="w-full p-2.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 dark:text-white focus:outline-none">
+                                    <option>EP</option><option>PP</option><option>TP</option>
+                                </select>
                             </div>
-                         </div>
+                            <div>
+                                <label class="block text-xs uppercase font-bold text-gray-500 dark:text-gray-400 mb-1">Suurus</label>
+                                <select name="Size" class="w-full p-2.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 dark:text-white focus:outline-none">
+                                    <option>XS</option><option>S</option><option>M</option><option>L</option><option>XL</option>
+                                </select>
+                            </div>
+                            <datalist id="existingUsers"></datalist>
+                            <div>
+                                <label class="block text-xs uppercase font-bold text-blue-600 dark:text-blue-400 mb-1">Kasutaja EL</label>
+                                <input name="User EL" list="existingUsers" class="w-full p-2.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 dark:text-white focus:outline-none" type="text" placeholder="Vali...">
+                            </div>
+                            <div>
+                                <label class="block text-xs uppercase font-bold text-green-600 dark:text-green-400 mb-1">Kasutaja EN</label>
+                                <input name="User EN" list="existingUsers" class="w-full p-2.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 dark:text-white focus:outline-none" type="text" placeholder="Vali...">
+                            </div>
+                            <div>
+                                <label class="block text-xs uppercase font-bold text-purple-600 dark:text-purple-400 mb-1">Kasutaja EA</label>
+                                <input name="User EA" list="existingUsers" class="w-full p-2.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 dark:text-white focus:outline-none" type="text" placeholder="Vali...">
+                            </div>
+                            <div>
+                                <label class="block text-xs uppercase font-bold text-gray-500 dark:text-gray-400 mb-1">Staatus</label>
+                                <select name="Status" class="w-full p-2.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 dark:text-white focus:outline-none">
+                                    <option>Töös</option><option>Ekspertiisis</option><option>Valmis</option><option>Ootel</option>
+                                </select>
+                            </div>
+                            <div class="md:col-span-2">
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-xs uppercase font-bold text-gray-500 dark:text-gray-400 mb-1">Algus</label>
+                                        <input name="Start Date" id="startDate" class="w-full p-2.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 dark:text-white focus:outline-none" type="date">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs uppercase font-bold text-gray-500 dark:text-gray-400 mb-1">Lõpp</label>
+                                        <input name="End Date" class="w-full p-2.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 dark:text-white focus:outline-none" type="date">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="md:col-span-2 flex items-end justify-between">
+                                <button type="button" id="cancelBtn" onclick="resetForm()" class="hidden text-sm text-gray-500 hover:text-red-500 font-bold py-2 px-4 transition">Tühista</button>
+                                <div class="flex items-center w-full justify-end gap-3">
+                                    <span id="statusMsg" class="text-sm font-bold animate-pulse"></span>
+                                    <button id="submitBtn" type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-6 rounded shadow transition transform active:scale-95">Salvesta</button>
+                                </div>
+                            </div>
+                        </form>
                     </div>
 
-                    <div class="md:col-span-2 flex items-end justify-between">
-                        <button type="button" id="cancelBtn" onclick="resetForm()" class="hidden text-gray-500 hover:text-gray-400 font-bold py-2 px-4 dark:text-gray-400 dark:hover:text-gray-300">Cancel Edit</button>
-                        <div class="flex items-center w-full justify-end">
-                            <span id="statusMsg" class="mr-4 text-sm font-bold"></span>
-                            <button id="submitBtn" type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded shadow transition">Save Project</button>
-                        </div>
-                    </div>
-                </form>
-            </div>
-
-            <div class="bg-white rounded-lg shadow overflow-x-auto mb-8 dark:bg-gray-800">
-                <table class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="bg-gray-100 text-gray-600 uppercase text-xs dark:bg-gray-700 dark:text-gray-300">
-                            <th class="p-4">Project</th>
-                            <th class="p-4">Stage</th>
-                            <th class="p-4">EL / EN / EA</th>
-                            <th class="p-4">Size</th>
-                            <th class="p-4">Status</th>
-                            <th class="p-4 text-center">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tableBody" class="text-sm text-gray-700 dark:text-gray-300">
-                        <tr><td colspan="7" class="p-4 text-center">Loading...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <div id="visualsView" class="hidden pb-12">
-            <h2 class="text-2xl font-bold mb-6 text-gray-800 dark:text-white">Work Distribution</h2>
-            
-            <div class="flex flex-col gap-8">
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <div class="bg-white p-6 rounded shadow dark:bg-gray-800">
-                        <h3 class="font-bold mb-4 text-gray-600 dark:text-gray-300">Projects by Size</h3>
-                        <div class="h-64">
-                            <canvas id="sizeChart"></canvas>
-                        </div>
-                    </div>
-                    <div class="bg-white p-6 rounded shadow dark:bg-gray-800">
-                        <h3 class="font-bold mb-4 text-gray-600 dark:text-gray-300">Weighted Workload (Points)</h3>
-                        <div class="h-64">
-                            <canvas id="userChart"></canvas>
+                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-gray-50 dark:bg-gray-700/50 text-gray-500 dark:text-gray-400 uppercase text-xs tracking-wider">
+                                        <th class="p-4 text-center w-12">✓</th> <th class="p-4 font-semibold">Projekt</th>
+                                        <th class="p-4 font-semibold">Staadium</th>
+                                        <th class="p-4 font-semibold">EL / EN / EA</th>
+                                        <th class="p-4 font-semibold">Suurus</th>
+                                        <th class="p-4 font-semibold">Staatus</th>
+                                        <th class="p-4 text-center font-semibold">Tegevus</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tableBody" class="text-sm text-gray-700 dark:text-gray-300 divide-y divide-gray-100 dark:divide-gray-700">
+                                    <tr><td colspan="7" class="p-8 text-center text-gray-500">Andmeid laetakse...</td></tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
 
-                <div class="bg-white p-6 rounded shadow dark:bg-gray-800">
-                    <h3 class="font-bold mb-4 text-gray-600 dark:text-gray-300">Total Projects Count per User</h3>
-                    <div class="h-64">
-                        <canvas id="countChart"></canvas>
-                    </div>
-                </div>
             </div>
-        </div>
+        </main>
     </div>
 
     <script>
-        // *** PASTE YOUR EXISTING GOOGLE APPS SCRIPT URL HERE ***
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyJO-YMhKXCyeyktOzXiK8b0xexKoilVa3HLOpOhJ41X4vffBX-5DSj039rjwKXsWlypQ/exec';
         
         let allData = []; 
         let chart1, chart2, chart3;
 
-        // --- DARK MODE LOGIC ---
-        
-        // 1. On Load: Check LocalStorage or System Preference
+        // --- DARK MODE ---
         if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
             document.documentElement.classList.add('dark');
-        } else {
-            document.documentElement.classList.remove('dark');
         }
-
-        // 2. Toggle Function
         function toggleTheme() {
-            if (document.documentElement.classList.contains('dark')) {
-                document.documentElement.classList.remove('dark');
-                localStorage.theme = 'light';
-            } else {
-                document.documentElement.classList.add('dark');
-                localStorage.theme = 'dark';
-            }
-            // Re-render charts to update text colors
+            document.documentElement.classList.toggle('dark');
+            localStorage.theme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
             if (allData.length > 0) updateCharts(allData);
         }
 
         // --- DATA LOGIC ---
-
         async function loadData() {
             try {
                 const response = await fetch(SCRIPT_URL);
                 const json = await response.json();
                 allData = json.data;
-                
                 updateUserDatalist(allData);
                 renderTable(allData);
                 updateCharts(allData);
             } catch (err) {
                 console.error(err);
-                document.getElementById('tableBody').innerHTML = `<tr><td colspan="7" class="p-4 text-red-500 text-center">Error loading data</td></tr>`;
+                document.getElementById('tableBody').innerHTML = `<tr><td colspan="7" class="p-8 text-red-500 text-center font-bold">Viga andmete laadimisel.</td></tr>`;
             }
         }
 
@@ -241,22 +223,60 @@
             });
         }
 
+        // --- QUICK TOGGLE STATUS ---
+        async function toggleQuickStatus(checkbox, index) {
+            const row = allData[index];
+            const originalStatus = row['Status'];
+            
+            // Optimistic UI update (update locally first)
+            checkbox.disabled = true; // Prevent double clicks
+            
+            if (checkbox.checked) {
+                row['Status'] = 'Valmis';
+                // Auto set End Date if not set
+                if (!row['End Date']) {
+                    row['End Date'] = new Date().toISOString().split('T')[0];
+                }
+            } else {
+                row['Status'] = 'Töös'; // Revert to active
+            }
+
+            try {
+                // Send update to backend
+                await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(row) });
+                // Reload data to ensure everything is synced
+                await loadData();
+            } catch (error) {
+                console.error("Save error", error);
+                alert("Viga salvestamisel!");
+                checkbox.checked = !checkbox.checked; // Revert UI
+                row['Status'] = originalStatus;
+            } finally {
+                checkbox.disabled = false;
+            }
+        }
+
         function renderTable(data) {
             const tbody = document.getElementById('tableBody');
             tbody.innerHTML = '';
 
-            data.forEach(row => {
+            data.forEach((row, index) => {
                 const tr = document.createElement('tr');
-                tr.className = "border-b hover:bg-gray-50 dark:hover:bg-gray-700 transition dark:border-gray-700";
+                tr.className = "border-b hover:bg-gray-50 dark:hover:bg-gray-700/50 transition dark:border-gray-700 group";
                 
                 let statusColor = 'text-gray-600 dark:text-gray-400';
                 if(row['Status'] === 'Valmis') statusColor = 'text-green-600 dark:text-green-400';
                 if(row['Status'] === 'Töös') statusColor = 'text-blue-600 dark:text-blue-400';
                 if(row['Status'] === 'Ootel') statusColor = 'text-orange-600 dark:text-orange-400';
 
+                const isChecked = row['Status'] === 'Valmis' ? 'checked' : '';
+
                 tr.innerHTML = `
-                    <td class="p-4 font-semibold text-gray-800 dark:text-gray-200">${row['Project Name']}</td>
-                    <td class="p-4"><span class="bg-gray-200 dark:bg-gray-600 dark:text-gray-200 px-2 py-1 rounded text-xs font-bold">${row['Stage'] || '-'}</span></td>
+                    <td class="p-4 text-center">
+                        <input type="checkbox" onchange='toggleQuickStatus(this, ${index})' ${isChecked} class="w-5 h-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500 cursor-pointer">
+                    </td>
+                    <td class="p-4 font-medium text-gray-900 dark:text-white">${row['Project Name']}</td>
+                    <td class="p-4"><span class="bg-gray-100 dark:bg-gray-700 dark:text-gray-200 text-gray-600 px-2 py-1 rounded text-xs font-bold border border-gray-200 dark:border-gray-600">${row['Stage'] || '-'}</span></td>
                     <td class="p-4">
                         <div class="text-xs space-y-1">
                             ${row['User EL'] ? `<div><span class="text-blue-600 dark:text-blue-400 font-bold w-6 inline-block">EL:</span> ${row['User EL']}</div>` : ''}
@@ -264,54 +284,36 @@
                             ${row['User EA'] ? `<div><span class="text-purple-600 dark:text-purple-400 font-bold w-6 inline-block">EA:</span> ${row['User EA']}</div>` : ''}
                         </div>
                     </td>
-                    <td class="p-4 text-sm">${row['Size']}</td>
+                    <td class="p-4 text-sm font-mono text-gray-600 dark:text-gray-400">${row['Size']}</td>
                     <td class="p-4 text-xs uppercase tracking-wide font-bold ${statusColor}">${row['Status']}</td>
                     <td class="p-4 text-center">
-                        <button onclick='editRow(${JSON.stringify(row)})' class="text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-bold text-xs border border-blue-500 dark:border-blue-400 px-3 py-1 rounded">Edit</button>
+                        <button onclick='editRow(${JSON.stringify(row)})' class="opacity-0 group-hover:opacity-100 transition text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-medium text-xs px-3 py-1 rounded bg-blue-50 dark:bg-blue-900/30">Muuda</button>
                     </td>
                 `;
                 tbody.appendChild(tr);
             });
         }
 
-        // --- CHARTS ---
-        
+        // --- CHARTS & REST OF APP --- (Same as before)
         function stringToColor(str) {
             let hash = 0;
-            for (let i = 0; i < str.length; i++) {
-                hash = str.charCodeAt(i) + ((hash << 5) - hash);
-            }
+            for (let i = 0; i < str.length; i++) { hash = str.charCodeAt(i) + ((hash << 5) - hash); }
             const h = Math.abs(hash % 360);
             return `hsl(${h}, 70%, 60%)`;
         }
 
         function updateCharts(data) {
-            // Check if Dark Mode is active to adjust Chart Colors
             const isDark = document.documentElement.classList.contains('dark');
-            const textColor = isDark ? '#e5e7eb' : '#374151'; // Light gray for dark mode, dark gray for light mode
-            
-            // Shared Chart Options
+            const textColor = isDark ? '#e5e7eb' : '#374151'; 
             const commonOptions = {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { labels: { color: textColor } },
-                    title: { display: true, color: textColor }
-                },
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { labels: { color: textColor } }, title: { display: false } },
                 scales: {
-                    y: { 
-                        beginAtZero: true, 
-                        ticks: { color: textColor, stepSize: 1 },
-                        grid: { color: isDark ? '#374151' : '#e5e5e5' }
-                    },
-                    x: {
-                        ticks: { color: textColor },
-                        grid: { display: false }
-                    }
+                    y: { beginAtZero: true, ticks: { color: textColor, stepSize: 1 }, grid: { color: isDark ? '#374151' : '#e5e5e5' } },
+                    x: { ticks: { color: textColor }, grid: { display: false } }
                 }
             };
 
-            // 1. Projects by Size (Doughnut)
             const sizes = { 'XS':0, 'S':0, 'M':0, 'L':0, 'XL':0 };
             data.forEach(r => { if(sizes[r['Size']] !== undefined) sizes[r['Size']]++; });
 
@@ -319,17 +321,10 @@
             if(chart1) chart1.destroy();
             chart1 = new Chart(ctx1, {
                 type: 'doughnut',
-                data: {
-                    labels: Object.keys(sizes),
-                    datasets: [{ data: Object.values(sizes), backgroundColor: ['#E0E7FF', '#93C5FD', '#3B82F6', '#1D4ED8', '#1E3A8A'], borderWidth: 0 }]
-                },
-                options: {
-                    maintainAspectRatio: false,
-                    plugins: { legend: { labels: { color: textColor } } }
-                }
+                data: { labels: Object.keys(sizes), datasets: [{ data: Object.values(sizes), backgroundColor: ['#E0E7FF', '#93C5FD', '#3B82F6', '#1D4ED8', '#1E3A8A'], borderWidth: 0 }] },
+                options: { maintainAspectRatio: false, plugins: { legend: { labels: { color: textColor } } } }
             });
 
-            // Prepare User Data
             const sizeWeights = { 'XS': 1, 'S': 2, 'M': 3, 'L': 5, 'XL': 8 };
             const userWorkloadPoints = {};
             const userProjectCounts = {};
@@ -345,57 +340,45 @@
                 });
             });
 
-            // 2. WEIGHTED User Workload
             const sortedWorkload = Object.entries(userWorkloadPoints).sort(([,a], [,b]) => b - a);
             const workloadColors = sortedWorkload.map(u => stringToColor(u[0]));
-
             const ctx2 = document.getElementById('userChart').getContext('2d');
             if(chart2) chart2.destroy();
             chart2 = new Chart(ctx2, {
                 type: 'bar',
-                data: {
-                    labels: sortedWorkload.map(u => u[0]),
-                    datasets: [{ label: 'Points', data: sortedWorkload.map(u => u[1]), backgroundColor: workloadColors }]
-                },
+                data: { labels: sortedWorkload.map(u => u[0]), datasets: [{ label: 'Punktid', data: sortedWorkload.map(u => u[1]), backgroundColor: workloadColors }] },
                 options: commonOptions
             });
 
-            // 3. SIMPLE Count
             const sortedCounts = Object.entries(userProjectCounts).sort(([,a], [,b]) => b - a);
             const countColors = sortedCounts.map(u => stringToColor(u[0]));
-
             const ctx3 = document.getElementById('countChart').getContext('2d');
             if(chart3) chart3.destroy();
             chart3 = new Chart(ctx3, {
                 type: 'bar',
-                data: {
-                    labels: sortedCounts.map(u => u[0]),
-                    datasets: [{ label: 'Projects', data: sortedCounts.map(u => u[1]), backgroundColor: countColors }]
-                },
+                data: { labels: sortedCounts.map(u => u[0]), datasets: [{ label: 'Projektide arv', data: sortedCounts.map(u => u[1]), backgroundColor: countColors }] },
                 options: commonOptions
             });
         }
 
-        // --- FORM LOGIC ---
-        
         function editRow(row) {
             window.scrollTo({ top: 0, behavior: 'smooth' });
             switchView('list');
             const form = document.getElementById('projectForm');
             for (const key in row) { if (form.elements[key]) form.elements[key].value = row[key]; }
             document.getElementById('idField').value = row['ID'];
-            document.getElementById('formTitle').innerText = "Edit Project";
-            document.getElementById('submitBtn').innerText = "Update Project";
-            document.getElementById('submitBtn').className = "bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded shadow transition";
+            document.getElementById('formTitle').innerHTML = "<span>✏️</span> Muuda Projekti";
+            document.getElementById('submitBtn').innerText = "Uuenda";
+            document.getElementById('submitBtn').className = "bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 px-6 rounded shadow transition transform active:scale-95";
             document.getElementById('cancelBtn').classList.remove('hidden');
         }
 
         function resetForm() {
             document.getElementById('projectForm').reset();
             document.getElementById('idField').value = ""; 
-            document.getElementById('formTitle').innerText = "Add New Project";
-            document.getElementById('submitBtn').innerText = "Save Project";
-            document.getElementById('submitBtn').className = "bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded shadow transition";
+            document.getElementById('formTitle').innerHTML = "<span>➕</span> Lisa Uus Projekt";
+            document.getElementById('submitBtn').innerText = "Salvesta";
+            document.getElementById('submitBtn').className = "bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-6 rounded shadow transition transform active:scale-95";
             document.getElementById('cancelBtn').classList.add('hidden');
             document.getElementById('startDate').valueAsDate = new Date();
         }
@@ -405,35 +388,41 @@
             const btn = document.getElementById('submitBtn');
             const msg = document.getElementById('statusMsg');
             if(!document.getElementById('startDate').value) document.getElementById('startDate').valueAsDate = new Date();
-
             btn.disabled = true; btn.innerText = "Salvestan...";
             const formData = new FormData(this); const data = Object.fromEntries(formData.entries());
-
             try {
                 await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(data) });
-                msg.innerText = "Salvestatud!"; msg.className = "mr-4 text-sm font-bold text-green-600 dark:text-green-400";
+                msg.innerText = "Salvestatud!"; msg.className = "text-sm font-bold text-green-600 dark:text-green-400";
                 resetForm(); loadData(); 
             } catch (error) {
-                msg.innerText = "Viga!"; msg.className = "mr-4 text-sm font-bold text-red-600 dark:text-red-400";
+                msg.innerText = "Viga!"; msg.className = "text-sm font-bold text-red-600 dark:text-red-400";
             } finally {
                 btn.disabled = false; setTimeout(() => msg.innerText = "", 3000);
             }
         });
 
         function switchView(viewName) {
+            const btnList = document.getElementById('btnList');
+            const btnVisuals = document.getElementById('btnVisuals');
+            const activeClass = "bg-white shadow text-blue-600 dark:bg-gray-600 dark:text-white";
+            const inactiveClass = "text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white";
+
             if(viewName === 'list') {
                 document.getElementById('listView').classList.remove('hidden');
                 document.getElementById('visualsView').classList.add('hidden');
+                btnList.className = `px-4 py-1.5 text-sm font-medium rounded-md transition-all ${activeClass}`;
+                btnVisuals.className = `px-4 py-1.5 text-sm font-medium rounded-md transition-all ${inactiveClass}`;
             } else {
                 document.getElementById('listView').classList.add('hidden');
                 document.getElementById('visualsView').classList.remove('hidden');
+                btnList.className = `px-4 py-1.5 text-sm font-medium rounded-md transition-all ${inactiveClass}`;
+                btnVisuals.className = `px-4 py-1.5 text-sm font-medium rounded-md transition-all ${activeClass}`;
                 updateCharts(allData);
             }
         }
 
         document.getElementById('startDate').valueAsDate = new Date();
         loadData();
-
     </script>
 </body>
 </html>
