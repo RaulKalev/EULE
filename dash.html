@@ -211,32 +211,25 @@
             }
         }
 
-        // --- NEW: COLOR PALETTE ---
+        // --- NEW COLOR LOGIC: HSL with alternating Lightness ---
         function stringToColor(str) {
-            // Distinct High Contrast Palette (Tailwind 600 shades)
-            const palette = [
-                '#2563EB', // Blue
-                '#DC2626', // Red
-                '#059669', // Emerald
-                '#D97706', // Amber
-                '#7C3AED', // Violet
-                '#DB2777', // Pink
-                '#0891B2', // Cyan
-                '#EA580C', // Orange
-                '#4F46E5', // Indigo
-                '#65A30D', // Lime
-                '#0D9488', // Teal
-                '#C026D3', // Fuchsia
-                '#CA8A04', // Yellow
-                '#4B5563'  // Gray
-            ];
-            
             let hash = 0;
             for (let i = 0; i < str.length; i++) {
                 hash = str.charCodeAt(i) + ((hash << 5) - hash);
             }
-            const index = Math.abs(hash) % palette.length;
-            return palette[index];
+            
+            // 1. Hue based on string
+            const h = Math.abs(hash % 360);
+            
+            // 2. Saturation fixed for consistency
+            const s = 70; 
+            
+            // 3. Lightness Toggle: Even hash = Rich (50%), Odd hash = Pale (80%)
+            // This ensures if two names map to "Blue" (hue 240), one might be Dark Blue, one Light Blue.
+            const isPale = (Math.floor(Math.abs(hash) / 360) % 2) === 1;
+            const l = isPale ? 80 : 50; 
+
+            return `hsl(${h}, ${s}%, ${l}%)`;
         }
 
         // HELPERS
@@ -251,7 +244,9 @@
             const style = isDone 
                 ? 'bg-gray-200 text-gray-500 line-through dark:bg-gray-700 dark:text-gray-500' 
                 : `${colorClass} ${darkColorClass}`;
-            return users.map(u => `<span class="${style} text-xs font-semibold mr-1 px-1.5 py-0.5 rounded transition">${u}</span>`).join('');
+            return users.map(u => 
+                `<span class="${style} text-xs font-semibold mr-1 px-1.5 py-0.5 rounded transition" style="background-color: ${stringToColor(u)}; color: #fff; text-shadow: 0 1px 1px rgba(0,0,0,0.3); border:none;">${u}</span>`
+            ).join('');
         }
 
         // DATA LOGIC
@@ -469,6 +464,8 @@
                 const doneEN = row['Done EN'] === true || row['Done EN'] === 'TRUE';
                 const doneEA = row['Done EA'] === true || row['Done EA'] === 'TRUE';
 
+                // Use the stringToColor logic for table badges too so they match the chart
+                // NOTE: I am overriding the class based coloring here to enforce the user's specific color identity
                 const elUsers = createBadges(row['User EL'], 'bg-blue-100 text-blue-800', 'dark:bg-blue-900 dark:text-blue-200', doneEL);
                 const enUsers = createBadges(row['User EN'], 'bg-green-100 text-green-800', 'dark:bg-green-900 dark:text-green-200', doneEN);
                 const eaUsers = createBadges(row['User EA'], 'bg-purple-100 text-purple-800', 'dark:bg-purple-900 dark:text-purple-200', doneEA);
@@ -550,7 +547,7 @@
                             userStats[user].points += pointsPerPerson;
                             userStats[user].count += 1;
                             
-                            // *** UPDATED TOOLTIP CONTENT: Name (Part - Stage - Size) ***
+                            // Tooltip info
                             const details = `${r['Project Name']} (${role.label} - ${r['Stage']||'-'} - ${r['Size']||'-'})`;
                             userStats[user].projects.push(details);
                         });
@@ -565,13 +562,15 @@
             const countData = sortedUsers.map(u => u[1].count);
             const projectLists = sortedUsers.map(u => u[1].projects);
             
+            // Add border to make pale colors visible
             const userColors = labels.map(u => stringToColor(u));
+            const borderColors = labels.map(u => stringToColor(u).replace('50%', '40%').replace('80%', '60%')); // Slightly darker border
 
             const ctx2 = document.getElementById('userChart').getContext('2d');
             if(chart2) chart2.destroy();
             chart2 = new Chart(ctx2, {
                 type: 'bar',
-                data: { labels: labels, datasets: [{ label: 'Punktid (Tegemata)', data: pointsData, backgroundColor: userColors }] },
+                data: { labels: labels, datasets: [{ label: 'Punktid (Tegemata)', data: pointsData, backgroundColor: userColors, borderColor: borderColors, borderWidth: 1 }] },
                 options: commonOptions
             });
 
@@ -579,7 +578,7 @@
             if(chart3) chart3.destroy();
             chart3 = new Chart(ctx3, {
                 type: 'bar',
-                data: { labels: labels, datasets: [{ label: 'Aktiivsed projektid', data: countData, backgroundColor: userColors }] },
+                data: { labels: labels, datasets: [{ label: 'Aktiivsed projektid', data: countData, backgroundColor: userColors, borderColor: borderColors, borderWidth: 1 }] },
                 options: {
                     ...commonOptions,
                     plugins: {
