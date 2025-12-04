@@ -4,42 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Töölaud • EULE</title>
-    
     <script src="https://cdn.tailwindcss.com"></script>
-    
     <script>
         tailwind.config = {
             darkMode: 'class',
             theme: {
                 extend: {
-                    colors: {
-                        gray: { 900: '#111827', 800: '#1f2937', 700: '#374151' }
-                    }
+                    colors: { gray: { 900: '#111827', 800: '#1f2937', 700: '#374151' } }
                 }
             }
         }
     </script>
-
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
     <style>
-        /* Smooth transitions */
-        body, div, nav, table, tr, td, th, input, select, aside {
-            transition: background-color 0.3s, color 0.3s, border-color 0.3s;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-fade-in {
-            animation: fadeIn 0.4s ease-out forwards;
-        }
+        body, div, nav, table, tr, td, th, input, select, aside { transition: background-color 0.3s, color 0.3s, border-color 0.3s; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
     </style>
 </head>
 <body class="bg-gray-100 text-gray-800 font-sans dark:bg-gray-900 dark:text-gray-100 overflow-hidden flex h-screen">
 
     <div class="flex-1 flex flex-col h-screen overflow-hidden relative">
-        
         <div class="absolute inset-0 z-0 opacity-10 pointer-events-none bg-gradient-to-br from-blue-200 to-purple-200 dark:from-blue-900 dark:to-purple-900"></div>
 
         <header class="h-16 bg-white/90 dark:bg-gray-800/90 backdrop-blur shadow-sm z-20 flex items-center justify-between px-6 border-b border-gray-200 dark:border-gray-700">
@@ -49,13 +34,11 @@
                     <span class="text-lg font-bold text-gray-800 dark:text-gray-100">EULE Töölaud</span>
                 </a>
             </div>
-
             <div class="flex items-center gap-4">
                 <div class="flex bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
                     <button onclick="switchView('visuals')" id="btnVisuals" class="px-4 py-1.5 text-sm font-medium rounded-md bg-white shadow text-blue-600 dark:bg-gray-600 dark:text-white transition-all">Visuaalid</button>
                     <button onclick="switchView('list')" id="btnList" class="px-4 py-1.5 text-sm font-medium rounded-md text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white transition-all">Andmed</button>
                 </div>
-
                 <button onclick="toggleTheme()" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition" title="Vaheta teemat">
                     <svg class="w-5 h-5 hidden dark:block text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
                     <svg class="w-5 h-5 block dark:hidden text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
@@ -67,20 +50,20 @@
             <div class="max-w-7xl mx-auto">
                 
                 <div id="visualsView" class="animate-fade-in pb-12">
-                    <h2 class="text-2xl font-bold mb-6 text-gray-800 dark:text-white">Tööjaotus ja Statistika</h2>
+                    <h2 class="text-2xl font-bold mb-6 text-gray-800 dark:text-white">Aktiivne Töökoormus</h2>
                     <div class="flex flex-col gap-6">
                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                             <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-                                <h3 class="font-bold mb-4 text-gray-600 dark:text-gray-300 text-sm uppercase">Projektid Suuruse Järgi</h3>
+                                <h3 class="font-bold mb-4 text-gray-600 dark:text-gray-300 text-sm uppercase">Aktiivsed Projektid (Suurus)</h3>
                                 <div class="h-64"><canvas id="sizeChart"></canvas></div>
                             </div>
                             <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-                                <h3 class="font-bold mb-4 text-gray-600 dark:text-gray-300 text-sm uppercase">Kaalutud Töökoormus (Punktid)</h3>
+                                <h3 class="font-bold mb-4 text-gray-600 dark:text-gray-300 text-sm uppercase">Kaalutud Töökoormus (Tegemata)</h3>
                                 <div class="h-64"><canvas id="userChart"></canvas></div>
                             </div>
                         </div>
                         <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-                            <h3 class="font-bold mb-4 text-gray-600 dark:text-gray-300 text-sm uppercase">Projektide Arv Kasutaja Kohta</h3>
+                            <h3 class="font-bold mb-4 text-gray-600 dark:text-gray-300 text-sm uppercase">Aktiivsete Projektide Arv Kasutaja Kohta</h3>
                             <div class="h-64"><canvas id="countChart"></canvas></div>
                         </div>
                     </div>
@@ -96,7 +79,7 @@
                             <input type="hidden" name="ID" id="idField">
                             <div class="md:col-span-2">
                                 <label class="block text-xs uppercase font-bold text-gray-500 dark:text-gray-400 mb-1">Projekti Nimi</label>
-                                <input name="Project Name" class="w-full p-2.5 border border-gray-300 dark:border-gray-600 rounded bg-gray-50 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none" type="text" placeholder="Sisesta nimi..." required>
+                                <input name="Project Name" class="w-full p-2.5 border border-gray-300 dark:border-gray-600 rounded bg-gray-50 dark:bg-gray-700 dark:text-white focus:outline-none" type="text" placeholder="Sisesta nimi..." required>
                             </div>
                             <div>
                                 <label class="block text-xs uppercase font-bold text-gray-500 dark:text-gray-400 mb-1">Staadium</label>
@@ -113,15 +96,15 @@
                             <datalist id="existingUsers"></datalist>
                             <div>
                                 <label class="block text-xs uppercase font-bold text-blue-600 dark:text-blue-400 mb-1">Kasutaja EL</label>
-                                <input name="User EL" list="existingUsers" class="w-full p-2.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 dark:text-white focus:outline-none" type="text" placeholder="Vali...">
+                                <input name="User EL" list="existingUsers" class="w-full p-2.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 dark:text-white focus:outline-none" type="text" placeholder="Nimi 1, Nimi 2...">
                             </div>
                             <div>
                                 <label class="block text-xs uppercase font-bold text-green-600 dark:text-green-400 mb-1">Kasutaja EN</label>
-                                <input name="User EN" list="existingUsers" class="w-full p-2.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 dark:text-white focus:outline-none" type="text" placeholder="Vali...">
+                                <input name="User EN" list="existingUsers" class="w-full p-2.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 dark:text-white focus:outline-none" type="text" placeholder="Nimi 1, Nimi 2...">
                             </div>
                             <div>
                                 <label class="block text-xs uppercase font-bold text-purple-600 dark:text-purple-400 mb-1">Kasutaja EA</label>
-                                <input name="User EA" list="existingUsers" class="w-full p-2.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 dark:text-white focus:outline-none" type="text" placeholder="Vali...">
+                                <input name="User EA" list="existingUsers" class="w-full p-2.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 dark:text-white focus:outline-none" type="text" placeholder="Nimi 1, Nimi 2...">
                             </div>
                             <div>
                                 <label class="block text-xs uppercase font-bold text-gray-500 dark:text-gray-400 mb-1">Staatus</label>
@@ -156,9 +139,10 @@
                             <table class="w-full text-left border-collapse">
                                 <thead>
                                     <tr class="bg-gray-50 dark:bg-gray-700/50 text-gray-500 dark:text-gray-400 uppercase text-xs tracking-wider">
-                                        <th class="p-4 text-center w-12">✓</th> <th class="p-4 font-semibold">Projekt</th>
+                                        <th class="p-4 text-center w-12" title="Märgi terve projekt valminuks">✓</th> 
+                                        <th class="p-4 font-semibold">Projekt</th>
                                         <th class="p-4 font-semibold">Staadium</th>
-                                        <th class="p-4 font-semibold">EL / EN / EA</th>
+                                        <th class="p-4 font-semibold">EL / EN / EA (Märgi tehtuks)</th>
                                         <th class="p-4 font-semibold">Suurus</th>
                                         <th class="p-4 font-semibold">Staatus</th>
                                         <th class="p-4 text-center font-semibold">Tegevus</th>
@@ -182,7 +166,7 @@
         let allData = []; 
         let chart1, chart2, chart3;
 
-        // --- DARK MODE ---
+        // DARK MODE
         if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
             document.documentElement.classList.add('dark');
         }
@@ -192,7 +176,25 @@
             if (allData.length > 0) updateCharts(allData);
         }
 
-        // --- DATA LOGIC ---
+        // HELPERS
+        function getUniqueUsers(str) {
+            if (!str) return [];
+            return str.toString().split(',').map(s => s.trim()).filter(s => s !== '');
+        }
+
+        function createBadges(str, colorClass, darkColorClass, isDone) {
+            if (!str) return '';
+            const users = getUniqueUsers(str);
+            const style = isDone 
+                ? 'bg-gray-200 text-gray-500 line-through dark:bg-gray-700 dark:text-gray-500' 
+                : `${colorClass} ${darkColorClass}`;
+            
+            return users.map(u => 
+                `<span class="${style} text-xs font-semibold mr-1 px-1.5 py-0.5 rounded transition">${u}</span>`
+            ).join('');
+        }
+
+        // DATA LOGIC
         async function loadData() {
             try {
                 const response = await fetch(SCRIPT_URL);
@@ -210,9 +212,9 @@
         function updateUserDatalist(data) {
             const users = new Set();
             data.forEach(row => {
-                if(row['User EL']) users.add(row['User EL']);
-                if(row['User EN']) users.add(row['User EN']);
-                if(row['User EA']) users.add(row['User EA']);
+                ['User EL', 'User EN', 'User EA'].forEach(key => {
+                    getUniqueUsers(row[key]).forEach(n => users.add(n));
+                });
             });
             const datalist = document.getElementById('existingUsers');
             datalist.innerHTML = '';
@@ -223,36 +225,45 @@
             });
         }
 
-        // --- QUICK TOGGLE STATUS ---
+        // TOGGLE: WHOLE PROJECT
         async function toggleQuickStatus(checkbox, index) {
             const row = allData[index];
             const originalStatus = row['Status'];
-            
-            // Optimistic UI update (update locally first)
-            checkbox.disabled = true; // Prevent double clicks
+            checkbox.disabled = true; 
             
             if (checkbox.checked) {
                 row['Status'] = 'Valmis';
-                // Auto set End Date if not set
-                if (!row['End Date']) {
-                    row['End Date'] = new Date().toISOString().split('T')[0];
-                }
+                if (!row['End Date']) row['End Date'] = new Date().toISOString().split('T')[0];
             } else {
-                row['Status'] = 'Töös'; // Revert to active
+                row['Status'] = 'Töös'; 
             }
 
             try {
-                // Send update to backend
                 await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(row) });
-                // Reload data to ensure everything is synced
                 await loadData();
             } catch (error) {
-                console.error("Save error", error);
                 alert("Viga salvestamisel!");
-                checkbox.checked = !checkbox.checked; // Revert UI
+                checkbox.checked = !checkbox.checked;
                 row['Status'] = originalStatus;
             } finally {
                 checkbox.disabled = false;
+            }
+        }
+
+        // TOGGLE: INDIVIDUAL DISCIPLINE
+        async function togglePartStatus(checkbox, index, partKey) {
+            const row = allData[index];
+            const originalState = row[partKey];
+            row[partKey] = checkbox.checked ? true : ""; 
+            renderTable(allData); 
+            
+            try {
+                await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(row) });
+                await loadData();
+            } catch (error) {
+                alert("Viga salvestamisel!");
+                row[partKey] = originalState;
+                renderTable(allData);
             }
         }
 
@@ -271,6 +282,14 @@
 
                 const isChecked = row['Status'] === 'Valmis' ? 'checked' : '';
 
+                const doneEL = row['Done EL'] === true || row['Done EL'] === 'TRUE';
+                const doneEN = row['Done EN'] === true || row['Done EN'] === 'TRUE';
+                const doneEA = row['Done EA'] === true || row['Done EA'] === 'TRUE';
+
+                const elUsers = createBadges(row['User EL'], 'bg-blue-100 text-blue-800', 'dark:bg-blue-900 dark:text-blue-200', doneEL);
+                const enUsers = createBadges(row['User EN'], 'bg-green-100 text-green-800', 'dark:bg-green-900 dark:text-green-200', doneEN);
+                const eaUsers = createBadges(row['User EA'], 'bg-purple-100 text-purple-800', 'dark:bg-purple-900 dark:text-purple-200', doneEA);
+
                 tr.innerHTML = `
                     <td class="p-4 text-center">
                         <input type="checkbox" onchange='toggleQuickStatus(this, ${index})' ${isChecked} class="w-5 h-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500 cursor-pointer">
@@ -278,10 +297,10 @@
                     <td class="p-4 font-medium text-gray-900 dark:text-white">${row['Project Name']}</td>
                     <td class="p-4"><span class="bg-gray-100 dark:bg-gray-700 dark:text-gray-200 text-gray-600 px-2 py-1 rounded text-xs font-bold border border-gray-200 dark:border-gray-600">${row['Stage'] || '-'}</span></td>
                     <td class="p-4">
-                        <div class="text-xs space-y-1">
-                            ${row['User EL'] ? `<div><span class="text-blue-600 dark:text-blue-400 font-bold w-6 inline-block">EL:</span> ${row['User EL']}</div>` : ''}
-                            ${row['User EN'] ? `<div><span class="text-green-600 dark:text-green-400 font-bold w-6 inline-block">EN:</span> ${row['User EN']}</div>` : ''}
-                            ${row['User EA'] ? `<div><span class="text-purple-600 dark:text-purple-400 font-bold w-6 inline-block">EA:</span> ${row['User EA']}</div>` : ''}
+                        <div class="text-xs space-y-2">
+                            ${row['User EL'] ? `<div class="flex items-center gap-2"><input type="checkbox" ${doneEL ? 'checked' : ''} onchange='togglePartStatus(this, ${index}, "Done EL")' class="w-3 h-3 text-blue-600 rounded border-gray-300 cursor-pointer"><span class="text-blue-600 dark:text-blue-400 font-bold w-6 inline-block">EL:</span> ${elUsers}</div>` : ''}
+                            ${row['User EN'] ? `<div class="flex items-center gap-2"><input type="checkbox" ${doneEN ? 'checked' : ''} onchange='togglePartStatus(this, ${index}, "Done EN")' class="w-3 h-3 text-green-600 rounded border-gray-300 cursor-pointer"><span class="text-green-600 dark:text-green-400 font-bold w-6 inline-block">EN:</span> ${enUsers}</div>` : ''}
+                            ${row['User EA'] ? `<div class="flex items-center gap-2"><input type="checkbox" ${doneEA ? 'checked' : ''} onchange='togglePartStatus(this, ${index}, "Done EA")' class="w-3 h-3 text-purple-600 rounded border-gray-300 cursor-pointer"><span class="text-purple-600 dark:text-purple-400 font-bold w-6 inline-block">EA:</span> ${eaUsers}</div>` : ''}
                         </div>
                     </td>
                     <td class="p-4 text-sm font-mono text-gray-600 dark:text-gray-400">${row['Size']}</td>
@@ -294,7 +313,7 @@
             });
         }
 
-        // --- CHARTS & REST OF APP --- (Same as before)
+        // CHARTS
         function stringToColor(str) {
             let hash = 0;
             for (let i = 0; i < str.length; i++) { hash = str.charCodeAt(i) + ((hash << 5) - hash); }
@@ -314,6 +333,7 @@
                 }
             };
 
+            // Chart 1: Project Sizes (Count active ones only? User choice, usually we show all)
             const sizes = { 'XS':0, 'S':0, 'M':0, 'L':0, 'XL':0 };
             data.forEach(r => { if(sizes[r['Size']] !== undefined) sizes[r['Size']]++; });
 
@@ -325,17 +345,40 @@
                 options: { maintainAspectRatio: false, plugins: { legend: { labels: { color: textColor } } } }
             });
 
+            // UPDATED Logic: Exclude "Done" items from ACTIVE workload and counts
             const sizeWeights = { 'XS': 1, 'S': 2, 'M': 3, 'L': 5, 'XL': 8 };
             const userWorkloadPoints = {};
             const userProjectCounts = {};
 
             data.forEach(r => {
+                // If entire project is marked Done (Valmis), skip it completely for active load
+                if (r['Status'] === 'Valmis') return;
+
                 const points = sizeWeights[r['Size']] || 1;
-                ['User EL', 'User EN', 'User EA'].forEach(role => {
-                    const user = r[role];
-                    if(user) {
-                        userWorkloadPoints[user] = (userWorkloadPoints[user] || 0) + points;
-                        userProjectCounts[user] = (userProjectCounts[user] || 0) + 1;
+                
+                const roles = [
+                    {userKey: 'User EL', doneKey: 'Done EL'},
+                    {userKey: 'User EN', doneKey: 'Done EN'},
+                    {userKey: 'User EA', doneKey: 'Done EA'}
+                ];
+
+                roles.forEach(role => {
+                    // Only count if this specific part is NOT marked done
+                    const isDone = r[role.doneKey] === true || r[role.doneKey] === 'TRUE';
+
+                    if (!isDone) {
+                        const rawUserField = r[role.userKey];
+                        const users = getUniqueUsers(rawUserField);
+                        
+                        if (users.length > 0) {
+                            const pointsPerPerson = points / users.length;
+                            users.forEach(user => {
+                                // Add to Workload Points
+                                userWorkloadPoints[user] = (userWorkloadPoints[user] || 0) + pointsPerPerson;
+                                // Add to Active Project Count
+                                userProjectCounts[user] = (userProjectCounts[user] || 0) + 1;
+                            });
+                        }
                     }
                 });
             });
@@ -346,7 +389,7 @@
             if(chart2) chart2.destroy();
             chart2 = new Chart(ctx2, {
                 type: 'bar',
-                data: { labels: sortedWorkload.map(u => u[0]), datasets: [{ label: 'Punktid', data: sortedWorkload.map(u => u[1]), backgroundColor: workloadColors }] },
+                data: { labels: sortedWorkload.map(u => u[0]), datasets: [{ label: 'Punktid (Tegemata)', data: sortedWorkload.map(u => u[1]), backgroundColor: workloadColors }] },
                 options: commonOptions
             });
 
@@ -356,7 +399,7 @@
             if(chart3) chart3.destroy();
             chart3 = new Chart(ctx3, {
                 type: 'bar',
-                data: { labels: sortedCounts.map(u => u[0]), datasets: [{ label: 'Projektide arv', data: sortedCounts.map(u => u[1]), backgroundColor: countColors }] },
+                data: { labels: sortedCounts.map(u => u[0]), datasets: [{ label: 'Aktiivsed projektid', data: sortedCounts.map(u => u[1]), backgroundColor: countColors }] },
                 options: commonOptions
             });
         }
