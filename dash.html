@@ -24,6 +24,30 @@
 </head>
 <body class="bg-gray-100 text-gray-800 font-sans dark:bg-gray-900 dark:text-gray-100 overflow-hidden flex h-screen">
 
+    <div id="loginOverlay" class="fixed inset-0 z-50 bg-gray-900 flex items-center justify-center transition-opacity duration-500">
+        <div class="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-2xl max-w-sm w-full border border-gray-200 dark:border-gray-700 relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-500 to-purple-500"></div>
+            
+            <div class="text-center mb-6">
+                <img src="assets/logos/eule-logo.png" alt="Logo" class="h-12 mx-auto mb-4 object-contain">
+                <h2 class="text-2xl font-bold text-gray-800 dark:text-white">Tere tulemast</h2>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Palun sisestage parool</p>
+            </div>
+
+            <form id="loginForm" class="space-y-4">
+                <div>
+                    <input type="password" id="loginPass" placeholder="Salasõna..." 
+                        class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition">
+                </div>
+                <button type="submit" id="btnLogin" 
+                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg shadow transition transform active:scale-95">
+                    Logi sisse
+                </button>
+                <p id="loginError" class="text-red-500 text-sm text-center font-bold hidden"></p>
+            </form>
+        </div>
+    </div>
+
     <div class="flex-1 flex flex-col h-screen overflow-hidden relative">
         <div class="absolute inset-0 z-0 opacity-10 pointer-events-none bg-gradient-to-br from-blue-200 to-purple-200 dark:from-blue-900 dark:to-purple-900"></div>
 
@@ -39,9 +63,14 @@
                     <button onclick="switchView('visuals')" id="btnVisuals" class="px-4 py-1.5 text-sm font-medium rounded-md bg-white shadow text-blue-600 dark:bg-gray-600 dark:text-white transition-all">Visuaalid</button>
                     <button onclick="switchView('list')" id="btnList" class="px-4 py-1.5 text-sm font-medium rounded-md text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white transition-all">Andmed</button>
                 </div>
+                
                 <button onclick="toggleTheme()" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition" title="Vaheta teemat">
                     <svg class="w-5 h-5 hidden dark:block text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
                     <svg class="w-5 h-5 block dark:hidden text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+                </button>
+
+                <button onclick="logout()" class="p-2 rounded-full hover:bg-red-50 dark:hover:bg-red-900/30 text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition" title="Logi välja">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
                 </button>
             </div>
         </header>
@@ -198,7 +227,61 @@
         let allData = []; 
         let chart1, chart2, chart3;
 
-        // DARK MODE
+        // --- AUTHENTICATION LOGIC ---
+        const loginOverlay = document.getElementById('loginOverlay');
+        
+        // Check login on load
+        if (localStorage.getItem('eule_auth_token') === 'LOGGED_IN_TOKEN') {
+            loginOverlay.style.display = 'none';
+            loadData();
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const pass = document.getElementById('loginPass').value;
+            const btn = document.getElementById('btnLogin');
+            const err = document.getElementById('loginError');
+
+            btn.disabled = true; 
+            btn.innerText = "Kontrollin...";
+            err.classList.add('hidden');
+
+            try {
+                const response = await fetch(SCRIPT_URL, {
+                    method: "POST",
+                    body: JSON.stringify({ action: "login", password: pass })
+                });
+                const json = await response.json();
+
+                if (json.result === "success") {
+                    localStorage.setItem('eule_auth_token', json.token);
+                    loginOverlay.classList.add('opacity-0');
+                    setTimeout(() => {
+                        loginOverlay.classList.add('hidden');
+                        loginOverlay.style.display = 'none'; // Ensure it's gone
+                        loadData();
+                    }, 500);
+                } else {
+                    err.innerText = "Vale parool!";
+                    err.classList.remove('hidden');
+                    btn.disabled = false;
+                    btn.innerText = "Logi sisse";
+                }
+            } catch (error) {
+                console.error(error);
+                err.innerText = "Ühenduse viga!";
+                err.classList.remove('hidden');
+                btn.disabled = false;
+                btn.innerText = "Logi sisse";
+            }
+        });
+
+        function logout() {
+            localStorage.removeItem('eule_auth_token');
+            location.reload();
+        }
+
+        // --- DARK MODE ---
         if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
             document.documentElement.classList.add('dark');
         }
@@ -212,52 +295,37 @@
             }
         }
 
-// --- NEW: DISTINCT PASTEL PALETTE ---
+        // --- PASTEL PALETTE ---
         function stringToColor(str) {
-            // 10 Distinct Pastel Tones (ColorBrewer Set 3 adapted)
             const pastelColors = [
-                '#8DD3C7', // Teal Pastel
-                '#FFFFB3', // Yellow Pastel (Very Light)
-                '#BEBADA', // Purple Pastel
-                '#FB8072', // Red/Salmon Pastel
-                '#80B1D3', // Blue Pastel
-                '#FDB462', // Orange Pastel
-                '#B3DE69', // Green Pastel
-                '#FCCDE5', // Pink Pastel
-                '#D9D9D9', // Grey Pastel
-                '#BC80BD'  // Violet Pastel
+                '#8DD3C7', '#FFFFB3', '#BEBADA', '#FB8072', '#80B1D3', 
+                '#FDB462', '#B3DE69', '#FCCDE5', '#D9D9D9', '#BC80BD'
             ];
-
             let hash = 0;
             for (let i = 0; i < str.length; i++) {
                 hash = str.charCodeAt(i) + ((hash << 5) - hash);
             }
-
-            // Get index 0-9
-            const index = Math.abs(hash) % 10;
-            return pastelColors[index];
+            return pastelColors[Math.abs(hash) % 10];
         }
 
-        // HELPERS
         function getUniqueUsers(str) {
             if (!str) return [];
             return str.toString().split(',').map(s => s.trim()).filter(s => s !== '');
         }
 
-function createBadges(str, colorClass, darkColorClass, isDone) {
+        function createBadges(str, colorClass, darkColorClass, isDone) {
             if (!str) return '';
             const users = getUniqueUsers(str);
-            // Default styling for "Done" items remains grey
             const style = isDone 
                 ? 'bg-gray-200 text-gray-500 line-through dark:bg-gray-700 dark:text-gray-500' 
                 : `${colorClass} ${darkColorClass}`;
             
             return users.map(u => 
-                // CHANGED: Text color is now dark (#1f2937) for contrast against pastel bg
                 `<span class="${style} text-xs font-semibold mr-1 px-1.5 py-0.5 rounded transition" style="${isDone ? '' : `background-color: ${stringToColor(u)}; color: #1f2937; border: 1px solid rgba(0,0,0,0.1);`}">${u}</span>`
             ).join('');
         }
-        // DATA LOGIC
+
+        // --- DATA LOGIC ---
         async function loadData() {
             try {
                 const response = await fetch(SCRIPT_URL);
@@ -290,7 +358,6 @@ function createBadges(str, colorClass, darkColorClass, isDone) {
             });
         }
 
-        // --- COMPLETED LIST ---
         function updateCompletedList(data) {
             const today = new Date();
             const currentMonth = today.getMonth();
@@ -328,7 +395,6 @@ function createBadges(str, colorClass, darkColorClass, isDone) {
             document.getElementById('completedListBody').innerHTML = html;
         }
 
-        // --- STATISTICS ---
         function updateStats(data) {
             const today = new Date(); today.setHours(0,0,0,0);
             const currentMonth = today.getMonth();
@@ -385,7 +451,6 @@ function createBadges(str, colorClass, darkColorClass, isDone) {
             document.getElementById('statDoneEA').innerText = doneMonth.ea;
         }
 
-        // TOGGLES
         async function toggleQuickStatus(checkbox, index) {
             const row = allData[index];
             const originalStatus = row['Status'];
@@ -471,23 +536,14 @@ function createBadges(str, colorClass, darkColorClass, isDone) {
             });
         }
 
-// CHARTS
+        // --- CHARTS (WITH DISTINCT COLORS) ---
         function updateCharts(data) {
             const isDark = document.documentElement.classList.contains('dark');
             const textColor = isDark ? '#e5e7eb' : '#374151'; 
             
-            // The 10 distinct Pastel Tones
             const chartPastels = [
-                '#8DD3C7', // Teal
-                '#FFFFB3', // Yellow
-                '#BEBADA', // Purple
-                '#FB8072', // Red
-                '#80B1D3', // Blue
-                '#FDB462', // Orange
-                '#B3DE69', // Green
-                '#FCCDE5', // Pink
-                '#D9D9D9', // Grey
-                '#BC80BD'  // Violet
+                '#8DD3C7', '#FFFFB3', '#BEBADA', '#FB8072', '#80B1D3', 
+                '#FDB462', '#B3DE69', '#FCCDE5', '#D9D9D9', '#BC80BD'
             ];
 
             const commonOptions = {
@@ -499,7 +555,6 @@ function createBadges(str, colorClass, darkColorClass, isDone) {
                 }
             };
 
-            // 1. Size Chart Logic
             const sizes = { 'XS':0, 'S':0, 'M':0, 'L':0, 'XL':0 };
             data.forEach(r => { if(sizes[r['Size']] !== undefined) sizes[r['Size']]++; });
 
@@ -511,7 +566,6 @@ function createBadges(str, colorClass, darkColorClass, isDone) {
                     labels: Object.keys(sizes), 
                     datasets: [{ 
                         data: Object.values(sizes), 
-                        // Use a fixed subset of the pastels for the doughnut sizes
                         backgroundColor: [chartPastels[4], chartPastels[0], chartPastels[6], chartPastels[5], chartPastels[3]], 
                         borderWidth: 1,
                         borderColor: isDark ? '#1f2937' : '#ffffff'
@@ -520,7 +574,6 @@ function createBadges(str, colorClass, darkColorClass, isDone) {
                 options: { maintainAspectRatio: false, plugins: { legend: { labels: { color: textColor } } } }
             });
 
-            // 2. User Statistics Logic
             const sizeWeights = { 'XS': 1, 'S': 2, 'M': 3, 'L': 5, 'XL': 8 };
             const stageWeights = { 'EP': 2, 'PP': 5, 'TP': 8 };
             const userStats = {};
@@ -558,16 +611,10 @@ function createBadges(str, colorClass, darkColorClass, isDone) {
             const countData = sortedUsers.map(u => u[1].count);
             const projectLists = sortedUsers.map(u => u[1].projects);
 
-            // --- UPDATED COLOR LOGIC ---
-            // Instead of calculating color based on name (stringToColor), 
-            // we cycle through the palette based on the INDEX (i).
-            // This guarantees that the first 10 bars always have unique colors.
+            // UNIQUE COLOR LOGIC
             const userColors = labels.map((_, i) => chartPastels[i % chartPastels.length]);
-            
-            // Add a subtle border (darker grey) to make the pastels pop against dark background
             const borderColors = labels.map(() => '#666666'); 
 
-            // 3. Render Bar Charts
             const ctx2 = document.getElementById('userChart').getContext('2d');
             if(chart2) chart2.destroy();
             chart2 = new Chart(ctx2, {
@@ -601,7 +648,6 @@ function createBadges(str, colorClass, darkColorClass, isDone) {
             });
         }
 
-        // --- FORM EDIT ---
         function editRow(row) {
             document.getElementById('mainContent').scrollTo({ top: 0, behavior: 'smooth' });
             switchView('list');
@@ -675,7 +721,7 @@ function createBadges(str, colorClass, darkColorClass, isDone) {
         }
 
         document.getElementById('startDate').valueAsDate = new Date();
-        loadData();
+        // Removed automatic loadData() here, it is now called only after login check
     </script>
 </body>
 </html>
