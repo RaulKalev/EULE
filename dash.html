@@ -313,7 +313,6 @@
             const currentMonth = today.getMonth();
             const currentYear = today.getFullYear();
 
-            // Counters
             let total = { all:0, el:0, en:0, ea:0 };
             let late = { all:0, el:0, en:0, ea:0 };
             let doneMonth = { all:0, el:0, en:0, ea:0 };
@@ -504,8 +503,7 @@
             const sizeWeights = { 'XS': 1, 'S': 2, 'M': 3, 'L': 5, 'XL': 8 };
             const stageWeights = { 'EP': 2, 'PP': 5, 'TP': 8 };
 
-            const userWorkloadPoints = {};
-            const userProjectCounts = {};
+            const userStats = {};
 
             data.forEach(r => {
                 if (r['Status'] === 'Valmis') return;
@@ -515,9 +513,9 @@
                 const totalTaskPoints = sizePt + stagePt;
                 
                 const roles = [
-                    {userKey: 'User EL', doneKey: 'Done EL'},
-                    {userKey: 'User EN', doneKey: 'Done EN'},
-                    {userKey: 'User EA', doneKey: 'Done EA'}
+                    {userKey: 'User EL', doneKey: 'Done EL', label: 'EL'},
+                    {userKey: 'User EN', doneKey: 'Done EN', label: 'EN'},
+                    {userKey: 'User EA', doneKey: 'Done EA', label: 'EA'}
                 ];
 
                 roles.forEach(role => {
@@ -528,39 +526,66 @@
                     if (!isDone && users.length > 0) {
                         const pointsPerPerson = totalTaskPoints / users.length;
                         users.forEach(user => {
-                            userWorkloadPoints[user] = (userWorkloadPoints[user] || 0) + pointsPerPerson;
-                            userProjectCounts[user] = (userProjectCounts[user] || 0) + 1;
+                            if(!userStats[user]) userStats[user] = { points: 0, count: 0, projects: [] };
+                            userStats[user].points += pointsPerPerson;
+                            userStats[user].count += 1;
+                            
+                            // *** UPDATED TOOLTIP CONTENT: Name (Part - Stage - Size) ***
+                            const details = `${r['Project Name']} (${role.label} - ${r['Stage']||'-'} - ${r['Size']||'-'})`;
+                            userStats[user].projects.push(details);
                         });
                     }
                 });
             });
 
-            const sortedWorkload = Object.entries(userWorkloadPoints).sort(([,a], [,b]) => b - a);
-            const workloadColors = sortedWorkload.map(u => stringToColor(u[0]));
+            const sortedUsers = Object.entries(userStats).sort(([,a], [,b]) => b.points - a.points);
+            
+            const labels = sortedUsers.map(u => u[0]);
+            const pointsData = sortedUsers.map(u => u[1].points);
+            const countData = sortedUsers.map(u => u[1].count);
+            const projectLists = sortedUsers.map(u => u[1].projects);
+            
+            const userColors = labels.map(u => stringToColor(u));
+
             const ctx2 = document.getElementById('userChart').getContext('2d');
             if(chart2) chart2.destroy();
             chart2 = new Chart(ctx2, {
                 type: 'bar',
-                data: { labels: sortedWorkload.map(u => u[0]), datasets: [{ label: 'Punktid (Tegemata)', data: sortedWorkload.map(u => u[1]), backgroundColor: workloadColors }] },
+                data: { labels: labels, datasets: [{ label: 'Punktid (Tegemata)', data: pointsData, backgroundColor: userColors }] },
                 options: commonOptions
             });
 
-            const sortedCounts = Object.entries(userProjectCounts).sort(([,a], [,b]) => b - a);
-            const countColors = sortedCounts.map(u => stringToColor(u[0]));
             const ctx3 = document.getElementById('countChart').getContext('2d');
             if(chart3) chart3.destroy();
             chart3 = new Chart(ctx3, {
                 type: 'bar',
-                data: { labels: sortedCounts.map(u => u[0]), datasets: [{ label: 'Aktiivsed projektid', data: sortedCounts.map(u => u[1]), backgroundColor: countColors }] },
-                options: commonOptions
+                data: { labels: labels, datasets: [{ label: 'Aktiivsed projektid', data: countData, backgroundColor: userColors }] },
+                options: {
+                    ...commonOptions,
+                    plugins: {
+                        ...commonOptions.plugins,
+                        tooltip: {
+                            callbacks: {
+                                label: (ctx) => ` ${ctx.parsed.y} projekti`,
+                                afterBody: (ctx) => {
+                                    const idx = ctx[0].dataIndex;
+                                    const projects = projectLists[idx];
+                                    if(projects.length > 10) {
+                                        return ['---', ...projects.slice(0,10), `...ja ${projects.length - 10} veel`];
+                                    }
+                                    return ['---', ...projects];
+                                }
+                            }
+                        }
+                    }
+                }
             });
         }
 
         function editRow(row) {
-            // Switch tabs
+            document.getElementById('mainContent').scrollTo({ top: 0, behavior: 'smooth' });
             switchView('list');
             
-            // Wait for switch, then scroll form into view
             setTimeout(() => {
                 const form = document.getElementById('scrollTarget');
                 if (form) form.scrollIntoView({ behavior: 'smooth', block: 'center' });
