@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Distribution Dashboard</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        gray: {
+                            900: '#111827',
+                            800: '#1f2937',
+                            700: '#374151',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        /* Smooth transition for theme switching */
+        body, div, nav, table, tr, td, th, input, select {
+            transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans dark:bg-gray-900 dark:text-gray-100">
+
+    <nav class="bg-white shadow mb-8 dark:bg-gray-800 dark:border-gray-700">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-blue-600 dark:text-blue-400">Team Dashboard</h1>
+            <div class="flex items-center gap-2">
+                
+                <button onclick="switchView('list')" class="px-4 py-2 bg-blue-100 text-blue-600 rounded hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-200 dark:hover:bg-blue-800">Data & Edit</button>
+                <button onclick="switchView('visuals')" class="px-4 py-2 bg-purple-100 text-purple-600 rounded hover:bg-purple-200 dark:bg-purple-900 dark:text-purple-200 dark:hover:bg-purple-800">Visuals</button>
+                
+                <button onclick="toggleTheme()" class="ml-4 p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none">
+                    <svg id="sunIcon" class="w-6 h-6 hidden dark:block text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                    <svg id="moonIcon" class="w-6 h-6 block dark:hidden text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto px-6">
+
+        <div id="listView">
+            
+            <div class="bg-white rounded-lg shadow-md p-6 mb-8 border-l-4 border-blue-500 dark:bg-gray-800 dark:border-blue-400">
+                <h2 id="formTitle" class="text-xl font-bold mb-4 text-gray-800 dark:text-white">Add New Project</h2>
+                <form id="projectForm" class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <input type="hidden" name="ID" id="idField">
+
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-bold mb-2 dark:text-gray-300">Project Name</label>
+                        <input name="Project Name" class="w-full p-2 border rounded bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400" type="text" placeholder="Project Title" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold mb-2 dark:text-gray-300">Stage</label>
+                        <select name="Stage" class="w-full p-2 border rounded bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                            <option>EP</option>
+                            <option>PP</option>
+                            <option>TP</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold mb-2 dark:text-gray-300">Size</label>
+                        <select name="Size" class="w-full p-2 border rounded bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                            <option>XS</option>
+                            <option>S</option>
+                            <option>M</option>
+                            <option>L</option>
+                            <option>XL</option>
+                        </select>
+                    </div>
+
+                    <datalist id="existingUsers"></datalist>
+
+                    <div>
+                        <label class="block text-sm font-bold mb-2 text-blue-600 dark:text-blue-400">User EL</label>
+                        <input name="User EL" list="existingUsers" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white" type="text" placeholder="Select or type...">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold mb-2 text-green-600 dark:text-green-400">User EN</label>
+                        <input name="User EN" list="existingUsers" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white" type="text" placeholder="Select or type...">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold mb-2 text-purple-600 dark:text-purple-400">User EA</label>
+                        <input name="User EA" list="existingUsers" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white" type="text" placeholder="Select or type...">
+                    </div>
+                    
+                    <div>
+                         <label class="block text-sm font-bold mb-2 dark:text-gray-300">Status</label>
+                        <select name="Status" class="w-full p-2 border rounded bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                            <option>Töös</option>
+                            <option>Ekspertiisis</option>
+                            <option>Valmis</option>
+                            <option>Ootel</option>
+                        </select>
+                    </div>
+
+                    <div class="md:col-span-2">
+                         <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-bold mb-2 dark:text-gray-300">Start Date</label>
+                                <input name="Start Date" id="startDate" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white" type="date">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold mb-2 dark:text-gray-300">End Date</label>
+                                <input name="End Date" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white" type="date">
+                            </div>
+                         </div>
+                    </div>
+
+                    <div class="md:col-span-2 flex items-end justify-between">
+                        <button type="button" id="cancelBtn" onclick="resetForm()" class="hidden text-gray-500 hover:text-gray-400 font-bold py-2 px-4 dark:text-gray-400 dark:hover:text-gray-300">Cancel Edit</button>
+                        <div class="flex items-center w-full justify-end">
+                            <span id="statusMsg" class="mr-4 text-sm font-bold"></span>
+                            <button id="submitBtn" type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded shadow transition">Save Project</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="bg-white rounded-lg shadow overflow-x-auto mb-8 dark:bg-gray-800">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-gray-100 text-gray-600 uppercase text-xs dark:bg-gray-700 dark:text-gray-300">
+                            <th class="p-4">Project</th>
+                            <th class="p-4">Stage</th>
+                            <th class="p-4">EL / EN / EA</th>
+                            <th class="p-4">Size</th>
+                            <th class="p-4">Status</th>
+                            <th class="p-4 text-center">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody" class="text-sm text-gray-700 dark:text-gray-300">
+                        <tr><td colspan="7" class="p-4 text-center">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="visualsView" class="hidden pb-12">
+            <h2 class="text-2xl font-bold mb-6 text-gray-800 dark:text-white">Work Distribution</h2>
+            
+            <div class="flex flex-col gap-8">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="bg-white p-6 rounded shadow dark:bg-gray-800">
+                        <h3 class="font-bold mb-4 text-gray-600 dark:text-gray-300">Projects by Size</h3>
+                        <div class="h-64">
+                            <canvas id="sizeChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded shadow dark:bg-gray-800">
+                        <h3 class="font-bold mb-4 text-gray-600 dark:text-gray-300">Weighted Workload (Points)</h3>
+                        <div class="h-64">
+                            <canvas id="userChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded shadow dark:bg-gray-800">
+                    <h3 class="font-bold mb-4 text-gray-600 dark:text-gray-300">Total Projects Count per User</h3>
+                    <div class="h-64">
+                        <canvas id="countChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // *** PASTE YOUR EXISTING GOOGLE APPS SCRIPT URL HERE ***
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyJO-YMhKXCyeyktOzXiK8b0xexKoilVa3HLOpOhJ41X4vffBX-5DSj039rjwKXsWlypQ/exec';
+        
+        let allData = []; 
+        let chart1, chart2, chart3;
+
+        // --- DARK MODE LOGIC ---
+        
+        // 1. On Load: Check LocalStorage or System Preference
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+
+        // 2. Toggle Function
+        function toggleTheme() {
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.theme = 'light';
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.theme = 'dark';
+            }
+            // Re-render charts to update text colors
+            if (allData.length > 0) updateCharts(allData);
+        }
+
+        // --- DATA LOGIC ---
+
+        async function loadData() {
+            try {
+                const response = await fetch(SCRIPT_URL);
+                const json = await response.json();
+                allData = json.data;
+                
+                updateUserDatalist(allData);
+                renderTable(allData);
+                updateCharts(allData);
+            } catch (err) {
+                console.error(err);
+                document.getElementById('tableBody').innerHTML = `<tr><td colspan="7" class="p-4 text-red-500 text-center">Error loading data</td></tr>`;
+            }
+        }
+
+        function updateUserDatalist(data) {
+            const users = new Set();
+            data.forEach(row => {
+                if(row['User EL']) users.add(row['User EL']);
+                if(row['User EN']) users.add(row['User EN']);
+                if(row['User EA']) users.add(row['User EA']);
+            });
+            const datalist = document.getElementById('existingUsers');
+            datalist.innerHTML = '';
+            users.forEach(user => {
+                const option = document.createElement('option');
+                option.value = user;
+                datalist.appendChild(option);
+            });
+        }
+
+        function renderTable(data) {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+
+            data.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.className = "border-b hover:bg-gray-50 dark:hover:bg-gray-700 transition dark:border-gray-700";
+                
+                let statusColor = 'text-gray-600 dark:text-gray-400';
+                if(row['Status'] === 'Valmis') statusColor = 'text-green-600 dark:text-green-400';
+                if(row['Status'] === 'Töös') statusColor = 'text-blue-600 dark:text-blue-400';
+                if(row['Status'] === 'Ootel') statusColor = 'text-orange-600 dark:text-orange-400';
+
+                tr.innerHTML = `
+                    <td class="p-4 font-semibold text-gray-800 dark:text-gray-200">${row['Project Name']}</td>
+                    <td class="p-4"><span class="bg-gray-200 dark:bg-gray-600 dark:text-gray-200 px-2 py-1 rounded text-xs font-bold">${row['Stage'] || '-'}</span></td>
+                    <td class="p-4">
+                        <div class="text-xs space-y-1">
+                            ${row['User EL'] ? `<div><span class="text-blue-600 dark:text-blue-400 font-bold w-6 inline-block">EL:</span> ${row['User EL']}</div>` : ''}
+                            ${row['User EN'] ? `<div><span class="text-green-600 dark:text-green-400 font-bold w-6 inline-block">EN:</span> ${row['User EN']}</div>` : ''}
+                            ${row['User EA'] ? `<div><span class="text-purple-600 dark:text-purple-400 font-bold w-6 inline-block">EA:</span> ${row['User EA']}</div>` : ''}
+                        </div>
+                    </td>
+                    <td class="p-4 text-sm">${row['Size']}</td>
+                    <td class="p-4 text-xs uppercase tracking-wide font-bold ${statusColor}">${row['Status']}</td>
+                    <td class="p-4 text-center">
+                        <button onclick='editRow(${JSON.stringify(row)})' class="text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-bold text-xs border border-blue-500 dark:border-blue-400 px-3 py-1 rounded">Edit</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // --- CHARTS ---
+        
+        function stringToColor(str) {
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) {
+                hash = str.charCodeAt(i) + ((hash << 5) - hash);
+            }
+            const h = Math.abs(hash % 360);
+            return `hsl(${h}, 70%, 60%)`;
+        }
+
+        function updateCharts(data) {
+            // Check if Dark Mode is active to adjust Chart Colors
+            const isDark = document.documentElement.classList.contains('dark');
+            const textColor = isDark ? '#e5e7eb' : '#374151'; // Light gray for dark mode, dark gray for light mode
+            
+            // Shared Chart Options
+            const commonOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { labels: { color: textColor } },
+                    title: { display: true, color: textColor }
+                },
+                scales: {
+                    y: { 
+                        beginAtZero: true, 
+                        ticks: { color: textColor, stepSize: 1 },
+                        grid: { color: isDark ? '#374151' : '#e5e5e5' }
+                    },
+                    x: {
+                        ticks: { color: textColor },
+                        grid: { display: false }
+                    }
+                }
+            };
+
+            // 1. Projects by Size (Doughnut)
+            const sizes = { 'XS':0, 'S':0, 'M':0, 'L':0, 'XL':0 };
+            data.forEach(r => { if(sizes[r['Size']] !== undefined) sizes[r['Size']]++; });
+
+            const ctx1 = document.getElementById('sizeChart').getContext('2d');
+            if(chart1) chart1.destroy();
+            chart1 = new Chart(ctx1, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(sizes),
+                    datasets: [{ data: Object.values(sizes), backgroundColor: ['#E0E7FF', '#93C5FD', '#3B82F6', '#1D4ED8', '#1E3A8A'], borderWidth: 0 }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    plugins: { legend: { labels: { color: textColor } } }
+                }
+            });
+
+            // Prepare User Data
+            const sizeWeights = { 'XS': 1, 'S': 2, 'M': 3, 'L': 5, 'XL': 8 };
+            const userWorkloadPoints = {};
+            const userProjectCounts = {};
+
+            data.forEach(r => {
+                const points = sizeWeights[r['Size']] || 1;
+                ['User EL', 'User EN', 'User EA'].forEach(role => {
+                    const user = r[role];
+                    if(user) {
+                        userWorkloadPoints[user] = (userWorkloadPoints[user] || 0) + points;
+                        userProjectCounts[user] = (userProjectCounts[user] || 0) + 1;
+                    }
+                });
+            });
+
+            // 2. WEIGHTED User Workload
+            const sortedWorkload = Object.entries(userWorkloadPoints).sort(([,a], [,b]) => b - a);
+            const workloadColors = sortedWorkload.map(u => stringToColor(u[0]));
+
+            const ctx2 = document.getElementById('userChart').getContext('2d');
+            if(chart2) chart2.destroy();
+            chart2 = new Chart(ctx2, {
+                type: 'bar',
+                data: {
+                    labels: sortedWorkload.map(u => u[0]),
+                    datasets: [{ label: 'Points', data: sortedWorkload.map(u => u[1]), backgroundColor: workloadColors }]
+                },
+                options: commonOptions
+            });
+
+            // 3. SIMPLE Count
+            const sortedCounts = Object.entries(userProjectCounts).sort(([,a], [,b]) => b - a);
+            const countColors = sortedCounts.map(u => stringToColor(u[0]));
+
+            const ctx3 = document.getElementById('countChart').getContext('2d');
+            if(chart3) chart3.destroy();
+            chart3 = new Chart(ctx3, {
+                type: 'bar',
+                data: {
+                    labels: sortedCounts.map(u => u[0]),
+                    datasets: [{ label: 'Projects', data: sortedCounts.map(u => u[1]), backgroundColor: countColors }]
+                },
+                options: commonOptions
+            });
+        }
+
+        // --- FORM LOGIC ---
+        
+        function editRow(row) {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            switchView('list');
+            const form = document.getElementById('projectForm');
+            for (const key in row) { if (form.elements[key]) form.elements[key].value = row[key]; }
+            document.getElementById('idField').value = row['ID'];
+            document.getElementById('formTitle').innerText = "Edit Project";
+            document.getElementById('submitBtn').innerText = "Update Project";
+            document.getElementById('submitBtn').className = "bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded shadow transition";
+            document.getElementById('cancelBtn').classList.remove('hidden');
+        }
+
+        function resetForm() {
+            document.getElementById('projectForm').reset();
+            document.getElementById('idField').value = ""; 
+            document.getElementById('formTitle').innerText = "Add New Project";
+            document.getElementById('submitBtn').innerText = "Save Project";
+            document.getElementById('submitBtn').className = "bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded shadow transition";
+            document.getElementById('cancelBtn').classList.add('hidden');
+            document.getElementById('startDate').valueAsDate = new Date();
+        }
+
+        document.getElementById('projectForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('submitBtn');
+            const msg = document.getElementById('statusMsg');
+            if(!document.getElementById('startDate').value) document.getElementById('startDate').valueAsDate = new Date();
+
+            btn.disabled = true; btn.innerText = "Salvestan...";
+            const formData = new FormData(this); const data = Object.fromEntries(formData.entries());
+
+            try {
+                await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(data) });
+                msg.innerText = "Salvestatud!"; msg.className = "mr-4 text-sm font-bold text-green-600 dark:text-green-400";
+                resetForm(); loadData(); 
+            } catch (error) {
+                msg.innerText = "Viga!"; msg.className = "mr-4 text-sm font-bold text-red-600 dark:text-red-400";
+            } finally {
+                btn.disabled = false; setTimeout(() => msg.innerText = "", 3000);
+            }
+        });
+
+        function switchView(viewName) {
+            if(viewName === 'list') {
+                document.getElementById('listView').classList.remove('hidden');
+                document.getElementById('visualsView').classList.add('hidden');
+            } else {
+                document.getElementById('listView').classList.add('hidden');
+                document.getElementById('visualsView').classList.remove('hidden');
+                updateCharts(allData);
+            }
+        }
+
+        document.getElementById('startDate').valueAsDate = new Date();
+        loadData();
+
+    </script>
+</body>
+</html>
