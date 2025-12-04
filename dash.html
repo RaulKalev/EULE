@@ -175,12 +175,13 @@
                                         <th class="p-4 font-semibold">Staadium</th>
                                         <th class="p-4 font-semibold">EL / EN / EA (Märgi tehtuks)</th>
                                         <th class="p-4 font-semibold">Suurus</th>
+                                        <th class="p-4 font-semibold">Tähtaeg</th>
                                         <th class="p-4 font-semibold">Staatus</th>
                                         <th class="p-4 text-center font-semibold">Tegevus</th>
                                     </tr>
                                 </thead>
                                 <tbody id="tableBody" class="text-sm text-gray-700 dark:text-gray-300 divide-y divide-gray-100 dark:divide-gray-700">
-                                    <tr><td colspan="7" class="p-8 text-center text-gray-500">Andmeid laetakse...</td></tr>
+                                    <tr><td colspan="8" class="p-8 text-center text-gray-500">Andmeid laetakse...</td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -211,25 +212,30 @@
             }
         }
 
-        // --- NEW COLOR LOGIC: HSL with alternating Lightness ---
+// --- NEW: DISTINCT PASTEL PALETTE ---
         function stringToColor(str) {
+            // 10 Distinct Pastel Tones (ColorBrewer Set 3 adapted)
+            const pastelColors = [
+                '#8DD3C7', // Teal Pastel
+                '#FFFFB3', // Yellow Pastel (Very Light)
+                '#BEBADA', // Purple Pastel
+                '#FB8072', // Red/Salmon Pastel
+                '#80B1D3', // Blue Pastel
+                '#FDB462', // Orange Pastel
+                '#B3DE69', // Green Pastel
+                '#FCCDE5', // Pink Pastel
+                '#D9D9D9', // Grey Pastel
+                '#BC80BD'  // Violet Pastel
+            ];
+
             let hash = 0;
             for (let i = 0; i < str.length; i++) {
                 hash = str.charCodeAt(i) + ((hash << 5) - hash);
             }
-            
-            // 1. Hue based on string
-            const h = Math.abs(hash % 360);
-            
-            // 2. Saturation fixed for consistency
-            const s = 70; 
-            
-            // 3. Lightness Toggle: Even hash = Rich (50%), Odd hash = Pale (80%)
-            // This ensures if two names map to "Blue" (hue 240), one might be Dark Blue, one Light Blue.
-            const isPale = (Math.floor(Math.abs(hash) / 360) % 2) === 1;
-            const l = isPale ? 80 : 50; 
 
-            return `hsl(${h}, ${s}%, ${l}%)`;
+            // Get index 0-9
+            const index = Math.abs(hash) % 10;
+            return pastelColors[index];
         }
 
         // HELPERS
@@ -238,17 +244,19 @@
             return str.toString().split(',').map(s => s.trim()).filter(s => s !== '');
         }
 
-        function createBadges(str, colorClass, darkColorClass, isDone) {
+function createBadges(str, colorClass, darkColorClass, isDone) {
             if (!str) return '';
             const users = getUniqueUsers(str);
+            // Default styling for "Done" items remains grey
             const style = isDone 
                 ? 'bg-gray-200 text-gray-500 line-through dark:bg-gray-700 dark:text-gray-500' 
                 : `${colorClass} ${darkColorClass}`;
+            
             return users.map(u => 
-                `<span class="${style} text-xs font-semibold mr-1 px-1.5 py-0.5 rounded transition" style="background-color: ${stringToColor(u)}; color: #fff; text-shadow: 0 1px 1px rgba(0,0,0,0.3); border:none;">${u}</span>`
+                // CHANGED: Text color is now dark (#1f2937) for contrast against pastel bg
+                `<span class="${style} text-xs font-semibold mr-1 px-1.5 py-0.5 rounded transition" style="${isDone ? '' : `background-color: ${stringToColor(u)}; color: #1f2937; border: 1px solid rgba(0,0,0,0.1);`}">${u}</span>`
             ).join('');
         }
-
         // DATA LOGIC
         async function loadData() {
             try {
@@ -287,16 +295,13 @@
             const today = new Date();
             const currentMonth = today.getMonth();
             const currentYear = today.getFullYear();
-            
             let html = '';
             let count = 0;
-
             const roles = [
                 { userKey: 'User EL', dateKey: 'Date EL', label: 'EL', color: 'text-blue-600 dark:text-blue-400' },
                 { userKey: 'User EN', dateKey: 'Date EN', label: 'EN', color: 'text-green-600 dark:text-green-400' },
                 { userKey: 'User EA', dateKey: 'Date EA', label: 'EA', color: 'text-purple-600 dark:text-purple-400' }
             ];
-
             data.forEach(r => {
                 roles.forEach(role => {
                     const dateStr = r[role.dateKey];
@@ -314,28 +319,20 @@
                                     <td class="p-3 font-bold ${role.color}">${role.label}</td>
                                     <td class="p-3"><span class="bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded text-xs">${r['Stage']}</span></td>
                                     <td class="p-3 text-gray-500 dark:text-gray-400">${r['Size']}</td>
-                                </tr>
-                            `;
+                                </tr>`;
                         }
                     }
                 });
             });
-
-            if (count === 0) {
-                html = '<tr><td colspan="6" class="p-6 text-center text-gray-400 italic">Sel kuul pole veel töid valminud.</td></tr>';
-            }
-
+            if (count === 0) html = '<tr><td colspan="6" class="p-6 text-center text-gray-400 italic">Sel kuul pole veel töid valminud.</td></tr>';
             document.getElementById('completedListBody').innerHTML = html;
         }
 
         // --- STATISTICS ---
         function updateStats(data) {
-            const today = new Date();
-            today.setHours(0,0,0,0);
-            
+            const today = new Date(); today.setHours(0,0,0,0);
             const currentMonth = today.getMonth();
             const currentYear = today.getFullYear();
-
             let total = { all:0, el:0, en:0, ea:0 };
             let late = { all:0, el:0, en:0, ea:0 };
             let doneMonth = { all:0, el:0, en:0, ea:0 };
@@ -344,15 +341,12 @@
                 const elExists = r['User EL'] && r['User EL'].toString().trim() !== '';
                 const enExists = r['User EN'] && r['User EN'].toString().trim() !== '';
                 const eaExists = r['User EA'] && r['User EA'].toString().trim() !== '';
-
                 const elDone = r['Done EL'] === true || r['Done EL'] === 'TRUE';
                 const enDone = r['Done EN'] === true || r['Done EN'] === 'TRUE';
                 const eaDone = r['Done EA'] === true || r['Done EA'] === 'TRUE';
                 const mainDone = r['Status'] === 'Valmis';
-
                 const endDate = r['End Date'] ? new Date(r['End Date']) : null;
                 if(endDate) endDate.setHours(0,0,0,0);
-                
                 const dateEL = r['Date EL'] ? new Date(r['Date EL']) : null;
                 const dateEN = r['Date EN'] ? new Date(r['Date EN']) : null;
                 const dateEA = r['Date EA'] ? new Date(r['Date EA']) : null;
@@ -365,7 +359,6 @@
                 if (elExists && dateEL && dateEL.getMonth() === currentMonth && dateEL.getFullYear() === currentYear) doneMonth.el++;
                 if (enExists && dateEN && dateEN.getMonth() === currentMonth && dateEN.getFullYear() === currentYear) doneMonth.en++;
                 if (eaExists && dateEA && dateEA.getMonth() === currentMonth && dateEA.getFullYear() === currentYear) doneMonth.ea++;
-                
                 doneMonth.all = doneMonth.el + doneMonth.en + doneMonth.ea;
 
                 if (!mainDone) {
@@ -382,32 +375,27 @@
             document.getElementById('statTotalEL').innerText = total.el;
             document.getElementById('statTotalEN').innerText = total.en;
             document.getElementById('statTotalEA').innerText = total.ea;
-
             document.getElementById('statLate').innerText = late.all;
             document.getElementById('statLateEL').innerText = late.el;
             document.getElementById('statLateEN').innerText = late.en;
             document.getElementById('statLateEA').innerText = late.ea;
-
             document.getElementById('statDone').innerText = doneMonth.all;
             document.getElementById('statDoneEL').innerText = doneMonth.el;
             document.getElementById('statDoneEN').innerText = doneMonth.en;
             document.getElementById('statDoneEA').innerText = doneMonth.ea;
         }
 
-
-        // TOGGLE: WHOLE PROJECT
+        // TOGGLES
         async function toggleQuickStatus(checkbox, index) {
             const row = allData[index];
             const originalStatus = row['Status'];
             checkbox.disabled = true; 
-            
             if (checkbox.checked) {
                 row['Status'] = 'Valmis';
                 if (!row['End Date']) row['End Date'] = new Date().toISOString().split('T')[0];
             } else {
                 row['Status'] = 'Töös'; 
             }
-
             try {
                 await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(row) });
                 await loadData();
@@ -415,17 +403,13 @@
                 alert("Viga salvestamisel!");
                 checkbox.checked = !checkbox.checked;
                 row['Status'] = originalStatus;
-            } finally {
-                checkbox.disabled = false;
-            }
+            } finally { checkbox.disabled = false; }
         }
 
-        // TOGGLE: INDIVIDUAL DISCIPLINE
         async function togglePartStatus(checkbox, index, partKey) {
             const row = allData[index];
             const originalState = row[partKey];
             const dateKey = partKey.replace('Done', 'Date'); 
-
             if (checkbox.checked) {
                 row[partKey] = true;
                 row[dateKey] = new Date().toISOString().split('T')[0];
@@ -433,9 +417,7 @@
                 row[partKey] = "";
                 row[dateKey] = "";
             }
-
             renderTable(allData); 
-            
             try {
                 await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(row) });
                 await loadData();
@@ -449,7 +431,6 @@
         function renderTable(data) {
             const tbody = document.getElementById('tableBody');
             tbody.innerHTML = '';
-
             data.forEach((row, index) => {
                 const tr = document.createElement('tr');
                 tr.className = "border-b hover:bg-gray-50 dark:hover:bg-gray-700/50 transition dark:border-gray-700 group";
@@ -464,26 +445,23 @@
                 const doneEN = row['Done EN'] === true || row['Done EN'] === 'TRUE';
                 const doneEA = row['Done EA'] === true || row['Done EA'] === 'TRUE';
 
-                // Use the stringToColor logic for table badges too so they match the chart
-                // NOTE: I am overriding the class based coloring here to enforce the user's specific color identity
                 const elUsers = createBadges(row['User EL'], 'bg-blue-100 text-blue-800', 'dark:bg-blue-900 dark:text-blue-200', doneEL);
                 const enUsers = createBadges(row['User EN'], 'bg-green-100 text-green-800', 'dark:bg-green-900 dark:text-green-200', doneEN);
                 const eaUsers = createBadges(row['User EA'], 'bg-purple-100 text-purple-800', 'dark:bg-purple-900 dark:text-purple-200', doneEA);
 
+                let endDateDisplay = row['End Date'] ? row['End Date'].toString().substring(0, 10) : '-';
+
                 tr.innerHTML = `
-                    <td class="p-4 text-center">
-                        <input type="checkbox" onchange='toggleQuickStatus(this, ${index})' ${isChecked} class="w-5 h-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500 cursor-pointer">
-                    </td>
+                    <td class="p-4 text-center"><input type="checkbox" onchange='toggleQuickStatus(this, ${index})' ${isChecked} class="w-5 h-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500 cursor-pointer"></td>
                     <td class="p-4 font-medium text-gray-900 dark:text-white">${row['Project Name']}</td>
                     <td class="p-4"><span class="bg-gray-100 dark:bg-gray-700 dark:text-gray-200 text-gray-600 px-2 py-1 rounded text-xs font-bold border border-gray-200 dark:border-gray-600">${row['Stage'] || '-'}</span></td>
-                    <td class="p-4">
-                        <div class="text-xs space-y-2">
-                            ${row['User EL'] ? `<div class="flex items-center gap-2"><input type="checkbox" ${doneEL ? 'checked' : ''} onchange='togglePartStatus(this, ${index}, "Done EL")' class="w-3 h-3 text-blue-600 rounded border-gray-300 cursor-pointer"><span class="text-blue-600 dark:text-blue-400 font-bold w-6 inline-block">EL:</span> ${elUsers}</div>` : ''}
-                            ${row['User EN'] ? `<div class="flex items-center gap-2"><input type="checkbox" ${doneEN ? 'checked' : ''} onchange='togglePartStatus(this, ${index}, "Done EN")' class="w-3 h-3 text-green-600 rounded border-gray-300 cursor-pointer"><span class="text-green-600 dark:text-green-400 font-bold w-6 inline-block">EN:</span> ${enUsers}</div>` : ''}
-                            ${row['User EA'] ? `<div class="flex items-center gap-2"><input type="checkbox" ${doneEA ? 'checked' : ''} onchange='togglePartStatus(this, ${index}, "Done EA")' class="w-3 h-3 text-purple-600 rounded border-gray-300 cursor-pointer"><span class="text-purple-600 dark:text-purple-400 font-bold w-6 inline-block">EA:</span> ${eaUsers}</div>` : ''}
-                        </div>
-                    </td>
+                    <td class="p-4"><div class="text-xs space-y-2">
+                        ${row['User EL'] ? `<div class="flex items-center gap-2"><input type="checkbox" ${doneEL ? 'checked' : ''} onchange='togglePartStatus(this, ${index}, "Done EL")' class="w-3 h-3 text-blue-600 rounded border-gray-300 cursor-pointer"><span class="text-blue-600 dark:text-blue-400 font-bold w-6 inline-block">EL:</span> ${elUsers}</div>` : ''}
+                        ${row['User EN'] ? `<div class="flex items-center gap-2"><input type="checkbox" ${doneEN ? 'checked' : ''} onchange='togglePartStatus(this, ${index}, "Done EN")' class="w-3 h-3 text-green-600 rounded border-gray-300 cursor-pointer"><span class="text-green-600 dark:text-green-400 font-bold w-6 inline-block">EN:</span> ${enUsers}</div>` : ''}
+                        ${row['User EA'] ? `<div class="flex items-center gap-2"><input type="checkbox" ${doneEA ? 'checked' : ''} onchange='togglePartStatus(this, ${index}, "Done EA")' class="w-3 h-3 text-purple-600 rounded border-gray-300 cursor-pointer"><span class="text-purple-600 dark:text-purple-400 font-bold w-6 inline-block">EA:</span> ${eaUsers}</div>` : ''}
+                    </div></td>
                     <td class="p-4 text-sm font-mono text-gray-600 dark:text-gray-400">${row['Size']}</td>
+                    <td class="p-4 text-sm text-gray-600 dark:text-gray-400">${endDateDisplay}</td>
                     <td class="p-4 text-xs uppercase tracking-wide font-bold ${statusColor}">${row['Status']}</td>
                     <td class="p-4 text-center">
                         <button onclick='editRow(${JSON.stringify(row)})' class="opacity-0 group-hover:opacity-100 transition text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-medium text-xs px-3 py-1 rounded bg-blue-50 dark:bg-blue-900/30">Muuda</button>
@@ -493,9 +471,25 @@
             });
         }
 
+// CHARTS
         function updateCharts(data) {
             const isDark = document.documentElement.classList.contains('dark');
             const textColor = isDark ? '#e5e7eb' : '#374151'; 
+            
+            // The 10 distinct Pastel Tones
+            const chartPastels = [
+                '#8DD3C7', // Teal
+                '#FFFFB3', // Yellow
+                '#BEBADA', // Purple
+                '#FB8072', // Red
+                '#80B1D3', // Blue
+                '#FDB462', // Orange
+                '#B3DE69', // Green
+                '#FCCDE5', // Pink
+                '#D9D9D9', // Grey
+                '#BC80BD'  // Violet
+            ];
+
             const commonOptions = {
                 responsive: true, maintainAspectRatio: false,
                 plugins: { legend: { labels: { color: textColor } }, title: { display: false } },
@@ -505,6 +499,7 @@
                 }
             };
 
+            // 1. Size Chart Logic
             const sizes = { 'XS':0, 'S':0, 'M':0, 'L':0, 'XL':0 };
             data.forEach(r => { if(sizes[r['Size']] !== undefined) sizes[r['Size']]++; });
 
@@ -512,42 +507,44 @@
             if(chart1) chart1.destroy();
             chart1 = new Chart(ctx1, {
                 type: 'doughnut',
-                data: { labels: Object.keys(sizes), datasets: [{ data: Object.values(sizes), backgroundColor: ['#E0E7FF', '#93C5FD', '#3B82F6', '#1D4ED8', '#1E3A8A'], borderWidth: 0 }] },
+                data: { 
+                    labels: Object.keys(sizes), 
+                    datasets: [{ 
+                        data: Object.values(sizes), 
+                        // Use a fixed subset of the pastels for the doughnut sizes
+                        backgroundColor: [chartPastels[4], chartPastels[0], chartPastels[6], chartPastels[5], chartPastels[3]], 
+                        borderWidth: 1,
+                        borderColor: isDark ? '#1f2937' : '#ffffff'
+                    }] 
+                },
                 options: { maintainAspectRatio: false, plugins: { legend: { labels: { color: textColor } } } }
             });
 
-            // LOGIC: SIZE + STAGE, Excluding Done
+            // 2. User Statistics Logic
             const sizeWeights = { 'XS': 1, 'S': 2, 'M': 3, 'L': 5, 'XL': 8 };
             const stageWeights = { 'EP': 2, 'PP': 5, 'TP': 8 };
-
             const userStats = {};
 
             data.forEach(r => {
                 if (r['Status'] === 'Valmis') return;
-
                 const sizePt = sizeWeights[r['Size']] || 1;
                 const stagePt = stageWeights[r['Stage']] || 0;
                 const totalTaskPoints = sizePt + stagePt;
-                
                 const roles = [
                     {userKey: 'User EL', doneKey: 'Done EL', label: 'EL'},
                     {userKey: 'User EN', doneKey: 'Done EN', label: 'EN'},
                     {userKey: 'User EA', doneKey: 'Done EA', label: 'EA'}
                 ];
-
                 roles.forEach(role => {
                     const isDone = r[role.doneKey] === true || r[role.doneKey] === 'TRUE';
                     const rawUserField = r[role.userKey];
                     const users = getUniqueUsers(rawUserField);
-
                     if (!isDone && users.length > 0) {
                         const pointsPerPerson = totalTaskPoints / users.length;
                         users.forEach(user => {
                             if(!userStats[user]) userStats[user] = { points: 0, count: 0, projects: [] };
                             userStats[user].points += pointsPerPerson;
                             userStats[user].count += 1;
-                            
-                            // Tooltip info
                             const details = `${r['Project Name']} (${role.label} - ${r['Stage']||'-'} - ${r['Size']||'-'})`;
                             userStats[user].projects.push(details);
                         });
@@ -556,16 +553,21 @@
             });
 
             const sortedUsers = Object.entries(userStats).sort(([,a], [,b]) => b.points - a.points);
-            
             const labels = sortedUsers.map(u => u[0]);
             const pointsData = sortedUsers.map(u => u[1].points);
             const countData = sortedUsers.map(u => u[1].count);
             const projectLists = sortedUsers.map(u => u[1].projects);
-            
-            // Add border to make pale colors visible
-            const userColors = labels.map(u => stringToColor(u));
-            const borderColors = labels.map(u => stringToColor(u).replace('50%', '40%').replace('80%', '60%')); // Slightly darker border
 
+            // --- UPDATED COLOR LOGIC ---
+            // Instead of calculating color based on name (stringToColor), 
+            // we cycle through the palette based on the INDEX (i).
+            // This guarantees that the first 10 bars always have unique colors.
+            const userColors = labels.map((_, i) => chartPastels[i % chartPastels.length]);
+            
+            // Add a subtle border (darker grey) to make the pastels pop against dark background
+            const borderColors = labels.map(() => '#666666'); 
+
+            // 3. Render Bar Charts
             const ctx2 = document.getElementById('userChart').getContext('2d');
             if(chart2) chart2.destroy();
             chart2 = new Chart(ctx2, {
@@ -589,9 +591,7 @@
                                 afterBody: (ctx) => {
                                     const idx = ctx[0].dataIndex;
                                     const projects = projectLists[idx];
-                                    if(projects.length > 10) {
-                                        return ['---', ...projects.slice(0,10), `...ja ${projects.length - 10} veel`];
-                                    }
+                                    if(projects.length > 10) return ['---', ...projects.slice(0,10), `...ja ${projects.length - 10} veel`];
                                     return ['---', ...projects];
                                 }
                             }
@@ -601,17 +601,25 @@
             });
         }
 
+        // --- FORM EDIT ---
         function editRow(row) {
             document.getElementById('mainContent').scrollTo({ top: 0, behavior: 'smooth' });
             switchView('list');
-            
             setTimeout(() => {
                 const form = document.getElementById('scrollTarget');
                 if (form) form.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }, 50);
 
             const form = document.getElementById('projectForm');
-            for (const key in row) { if (form.elements[key]) form.elements[key].value = row[key]; }
+            for (const key in row) {
+                if (form.elements[key]) {
+                    let val = row[key];
+                    if ((key === 'Start Date' || key === 'End Date') && val && val.length > 10) {
+                        val = val.substring(0, 10);
+                    }
+                    form.elements[key].value = val;
+                }
+            }
             document.getElementById('idField').value = row['ID'];
             document.getElementById('formTitle').innerHTML = "<span>✏️</span> Muuda Projekti";
             document.getElementById('submitBtn').innerText = "Uuenda";
@@ -652,7 +660,6 @@
             const btnVisuals = document.getElementById('btnVisuals');
             const activeClass = "bg-white shadow text-blue-600 dark:bg-gray-600 dark:text-white";
             const inactiveClass = "text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white";
-
             if(viewName === 'list') {
                 document.getElementById('listView').classList.remove('hidden');
                 document.getElementById('visualsView').classList.add('hidden');
