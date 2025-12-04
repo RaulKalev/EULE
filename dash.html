@@ -46,11 +46,43 @@
             </div>
         </header>
 
-        <main class="flex-1 overflow-y-auto p-6 z-10 scroll-smooth">
+        <main id="mainContent" class="flex-1 overflow-y-auto p-6 z-10 scroll-smooth">
             <div class="max-w-7xl mx-auto">
                 
                 <div id="visualsView" class="animate-fade-in pb-12">
                     <h2 class="text-2xl font-bold mb-6 text-gray-800 dark:text-white">Aktiivne Töökoormus</h2>
+                    
+                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 divide-y md:divide-y-0 md:divide-x divide-gray-100 dark:divide-gray-700">
+                            <div class="px-4"><p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Koguprojektid</p><p class="text-3xl font-bold text-gray-800 dark:text-white my-1" id="statTotal">0</p><div class="text-xs text-gray-500 dark:text-gray-400 space-y-1"><div class="flex justify-between"><span>EL:</span> <span id="statTotalEL" class="font-medium text-blue-600 dark:text-blue-400">0</span></div><div class="flex justify-between"><span>EN:</span> <span id="statTotalEN" class="font-medium text-green-600 dark:text-green-400">0</span></div><div class="flex justify-between"><span>EA:</span> <span id="statTotalEA" class="font-medium text-purple-600 dark:text-purple-400">0</span></div></div></div>
+                            <div class="px-4 pt-4 md:pt-0"><p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Hilinenud</p><p class="text-3xl font-bold text-red-500 my-1" id="statLate">0</p><div class="text-xs text-gray-500 dark:text-gray-400 space-y-1"><div class="flex justify-between"><span>EL:</span> <span id="statLateEL" class="font-medium">0</span></div><div class="flex justify-between"><span>EN:</span> <span id="statLateEN" class="font-medium">0</span></div><div class="flex justify-between"><span>EA:</span> <span id="statLateEA" class="font-medium">0</span></div></div></div>
+                            <div class="px-4 pt-4 md:pt-0"><p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Valminud (sel kuul)</p><p class="text-3xl font-bold text-green-500 my-1" id="statDone">0</p><div class="text-xs text-gray-500 dark:text-gray-400 space-y-1"><div class="flex justify-between"><span>EL:</span> <span id="statDoneEL" class="font-medium">0</span></div><div class="flex justify-between"><span>EN:</span> <span id="statDoneEN" class="font-medium">0</span></div><div class="flex justify-between"><span>EA:</span> <span id="statDoneEA" class="font-medium">0</span></div></div></div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden mb-8">
+                        <div class="p-4 border-b border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50">
+                            <h3 class="font-bold text-gray-700 dark:text-gray-200">Viimati Valminud (Sel kuul)</h3>
+                        </div>
+                        <div class="overflow-x-auto max-h-64 overflow-y-auto">
+                            <table class="w-full text-left text-sm">
+                                <thead class="bg-gray-50 dark:bg-gray-700/30 text-gray-500 dark:text-gray-400 sticky top-0">
+                                    <tr>
+                                        <th class="p-3 font-semibold">Kuupäev</th>
+                                        <th class="p-3 font-semibold">Projekt</th>
+                                        <th class="p-3 font-semibold">Tegija</th>
+                                        <th class="p-3 font-semibold">Osa</th>
+                                        <th class="p-3 font-semibold">Staadium</th>
+                                        <th class="p-3 font-semibold">Suurus</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="completedListBody" class="text-gray-700 dark:text-gray-300 divide-y divide-gray-100 dark:divide-gray-700">
+                                    <tr><td colspan="6" class="p-4 text-center text-gray-400">Andmed puuduvad...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
                     <div class="flex flex-col gap-6">
                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                             <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
@@ -70,8 +102,7 @@
                 </div>
 
                 <div id="listView" class="hidden animate-fade-in">
-                    
-                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-8">
+                    <div id="scrollTarget" class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-8">
                         <div class="flex justify-between items-center mb-6">
                             <h2 id="formTitle" class="text-xl font-bold text-gray-800 dark:text-white flex items-center gap-2"><span>➕</span> Lisa Uus Projekt</h2>
                         </div>
@@ -173,7 +204,11 @@
         function toggleTheme() {
             document.documentElement.classList.toggle('dark');
             localStorage.theme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
-            if (allData.length > 0) updateCharts(allData);
+            if (allData.length > 0) {
+                updateCharts(allData);
+                updateStats(allData);
+                updateCompletedList(allData);
+            }
         }
 
         // HELPERS
@@ -188,10 +223,7 @@
             const style = isDone 
                 ? 'bg-gray-200 text-gray-500 line-through dark:bg-gray-700 dark:text-gray-500' 
                 : `${colorClass} ${darkColorClass}`;
-            
-            return users.map(u => 
-                `<span class="${style} text-xs font-semibold mr-1 px-1.5 py-0.5 rounded transition">${u}</span>`
-            ).join('');
+            return users.map(u => `<span class="${style} text-xs font-semibold mr-1 px-1.5 py-0.5 rounded transition">${u}</span>`).join('');
         }
 
         // DATA LOGIC
@@ -203,6 +235,8 @@
                 updateUserDatalist(allData);
                 renderTable(allData);
                 updateCharts(allData);
+                updateStats(allData);
+                updateCompletedList(allData);
             } catch (err) {
                 console.error(err);
                 document.getElementById('tableBody').innerHTML = `<tr><td colspan="7" class="p-8 text-red-500 text-center font-bold">Viga andmete laadimisel.</td></tr>`;
@@ -224,6 +258,120 @@
                 datalist.appendChild(option);
             });
         }
+
+        // --- COMPLETED LIST ---
+        function updateCompletedList(data) {
+            const today = new Date();
+            const currentMonth = today.getMonth();
+            const currentYear = today.getFullYear();
+            
+            let html = '';
+            let count = 0;
+
+            const roles = [
+                { userKey: 'User EL', dateKey: 'Date EL', label: 'EL', color: 'text-blue-600 dark:text-blue-400' },
+                { userKey: 'User EN', dateKey: 'Date EN', label: 'EN', color: 'text-green-600 dark:text-green-400' },
+                { userKey: 'User EA', dateKey: 'Date EA', label: 'EA', color: 'text-purple-600 dark:text-purple-400' }
+            ];
+
+            data.forEach(r => {
+                roles.forEach(role => {
+                    const dateStr = r[role.dateKey];
+                    if (dateStr) {
+                        const date = new Date(dateStr);
+                        if (date.getMonth() === currentMonth && date.getFullYear() === currentYear) {
+                            count++;
+                            const formattedDate = date.toLocaleDateString('et-EE');
+                            const users = r[role.userKey] || '-';
+                            html += `
+                                <tr class="border-b border-gray-50 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-700/30">
+                                    <td class="p-3 whitespace-nowrap text-gray-500 dark:text-gray-400 font-mono text-xs">${formattedDate}</td>
+                                    <td class="p-3 font-medium text-gray-800 dark:text-gray-200">${r['Project Name']}</td>
+                                    <td class="p-3">${users}</td>
+                                    <td class="p-3 font-bold ${role.color}">${role.label}</td>
+                                    <td class="p-3"><span class="bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded text-xs">${r['Stage']}</span></td>
+                                    <td class="p-3 text-gray-500 dark:text-gray-400">${r['Size']}</td>
+                                </tr>
+                            `;
+                        }
+                    }
+                });
+            });
+
+            if (count === 0) {
+                html = '<tr><td colspan="6" class="p-6 text-center text-gray-400 italic">Sel kuul pole veel töid valminud.</td></tr>';
+            }
+
+            document.getElementById('completedListBody').innerHTML = html;
+        }
+
+        // --- STATISTICS ---
+        function updateStats(data) {
+            const today = new Date();
+            today.setHours(0,0,0,0);
+            
+            const currentMonth = today.getMonth();
+            const currentYear = today.getFullYear();
+
+            // Counters
+            let total = { all:0, el:0, en:0, ea:0 };
+            let late = { all:0, el:0, en:0, ea:0 };
+            let doneMonth = { all:0, el:0, en:0, ea:0 };
+
+            data.forEach(r => {
+                const elExists = r['User EL'] && r['User EL'].toString().trim() !== '';
+                const enExists = r['User EN'] && r['User EN'].toString().trim() !== '';
+                const eaExists = r['User EA'] && r['User EA'].toString().trim() !== '';
+
+                const elDone = r['Done EL'] === true || r['Done EL'] === 'TRUE';
+                const enDone = r['Done EN'] === true || r['Done EN'] === 'TRUE';
+                const eaDone = r['Done EA'] === true || r['Done EA'] === 'TRUE';
+                const mainDone = r['Status'] === 'Valmis';
+
+                const endDate = r['End Date'] ? new Date(r['End Date']) : null;
+                if(endDate) endDate.setHours(0,0,0,0);
+                
+                const dateEL = r['Date EL'] ? new Date(r['Date EL']) : null;
+                const dateEN = r['Date EN'] ? new Date(r['Date EN']) : null;
+                const dateEA = r['Date EA'] ? new Date(r['Date EA']) : null;
+
+                total.all++;
+                if(elExists) total.el++;
+                if(enExists) total.en++;
+                if(eaExists) total.ea++;
+
+                if (elExists && dateEL && dateEL.getMonth() === currentMonth && dateEL.getFullYear() === currentYear) doneMonth.el++;
+                if (enExists && dateEN && dateEN.getMonth() === currentMonth && dateEN.getFullYear() === currentYear) doneMonth.en++;
+                if (eaExists && dateEA && dateEA.getMonth() === currentMonth && dateEA.getFullYear() === currentYear) doneMonth.ea++;
+                
+                doneMonth.all = doneMonth.el + doneMonth.en + doneMonth.ea;
+
+                if (!mainDone) {
+                    if (endDate && endDate < today) {
+                        late.all++;
+                        if(elExists && !elDone) late.el++;
+                        if(enExists && !enDone) late.en++;
+                        if(eaExists && !eaDone) late.ea++;
+                    }
+                }
+            });
+
+            document.getElementById('statTotal').innerText = total.all;
+            document.getElementById('statTotalEL').innerText = total.el;
+            document.getElementById('statTotalEN').innerText = total.en;
+            document.getElementById('statTotalEA').innerText = total.ea;
+
+            document.getElementById('statLate').innerText = late.all;
+            document.getElementById('statLateEL').innerText = late.el;
+            document.getElementById('statLateEN').innerText = late.en;
+            document.getElementById('statLateEA').innerText = late.ea;
+
+            document.getElementById('statDone').innerText = doneMonth.all;
+            document.getElementById('statDoneEL').innerText = doneMonth.el;
+            document.getElementById('statDoneEN').innerText = doneMonth.en;
+            document.getElementById('statDoneEA').innerText = doneMonth.ea;
+        }
+
 
         // TOGGLE: WHOLE PROJECT
         async function toggleQuickStatus(checkbox, index) {
@@ -254,7 +402,16 @@
         async function togglePartStatus(checkbox, index, partKey) {
             const row = allData[index];
             const originalState = row[partKey];
-            row[partKey] = checkbox.checked ? true : ""; 
+            const dateKey = partKey.replace('Done', 'Date'); 
+
+            if (checkbox.checked) {
+                row[partKey] = true;
+                row[dateKey] = new Date().toISOString().split('T')[0];
+            } else {
+                row[partKey] = "";
+                row[dateKey] = "";
+            }
+
             renderTable(allData); 
             
             try {
@@ -281,7 +438,6 @@
                 if(row['Status'] === 'Ootel') statusColor = 'text-orange-600 dark:text-orange-400';
 
                 const isChecked = row['Status'] === 'Valmis' ? 'checked' : '';
-
                 const doneEL = row['Done EL'] === true || row['Done EL'] === 'TRUE';
                 const doneEN = row['Done EN'] === true || row['Done EN'] === 'TRUE';
                 const doneEA = row['Done EA'] === true || row['Done EA'] === 'TRUE';
@@ -333,7 +489,6 @@
                 }
             };
 
-            // Chart 1: Project Sizes (Count active ones only? User choice, usually we show all)
             const sizes = { 'XS':0, 'S':0, 'M':0, 'L':0, 'XL':0 };
             data.forEach(r => { if(sizes[r['Size']] !== undefined) sizes[r['Size']]++; });
 
@@ -345,16 +500,19 @@
                 options: { maintainAspectRatio: false, plugins: { legend: { labels: { color: textColor } } } }
             });
 
-            // UPDATED Logic: Exclude "Done" items from ACTIVE workload and counts
+            // LOGIC: SIZE + STAGE, Excluding Done
             const sizeWeights = { 'XS': 1, 'S': 2, 'M': 3, 'L': 5, 'XL': 8 };
+            const stageWeights = { 'EP': 2, 'PP': 5, 'TP': 8 };
+
             const userWorkloadPoints = {};
             const userProjectCounts = {};
 
             data.forEach(r => {
-                // If entire project is marked Done (Valmis), skip it completely for active load
                 if (r['Status'] === 'Valmis') return;
 
-                const points = sizeWeights[r['Size']] || 1;
+                const sizePt = sizeWeights[r['Size']] || 1;
+                const stagePt = stageWeights[r['Stage']] || 0;
+                const totalTaskPoints = sizePt + stagePt;
                 
                 const roles = [
                     {userKey: 'User EL', doneKey: 'Done EL'},
@@ -363,22 +521,16 @@
                 ];
 
                 roles.forEach(role => {
-                    // Only count if this specific part is NOT marked done
                     const isDone = r[role.doneKey] === true || r[role.doneKey] === 'TRUE';
+                    const rawUserField = r[role.userKey];
+                    const users = getUniqueUsers(rawUserField);
 
-                    if (!isDone) {
-                        const rawUserField = r[role.userKey];
-                        const users = getUniqueUsers(rawUserField);
-                        
-                        if (users.length > 0) {
-                            const pointsPerPerson = points / users.length;
-                            users.forEach(user => {
-                                // Add to Workload Points
-                                userWorkloadPoints[user] = (userWorkloadPoints[user] || 0) + pointsPerPerson;
-                                // Add to Active Project Count
-                                userProjectCounts[user] = (userProjectCounts[user] || 0) + 1;
-                            });
-                        }
+                    if (!isDone && users.length > 0) {
+                        const pointsPerPerson = totalTaskPoints / users.length;
+                        users.forEach(user => {
+                            userWorkloadPoints[user] = (userWorkloadPoints[user] || 0) + pointsPerPerson;
+                            userProjectCounts[user] = (userProjectCounts[user] || 0) + 1;
+                        });
                     }
                 });
             });
@@ -405,8 +557,15 @@
         }
 
         function editRow(row) {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            // Switch tabs
             switchView('list');
+            
+            // Wait for switch, then scroll form into view
+            setTimeout(() => {
+                const form = document.getElementById('scrollTarget');
+                if (form) form.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 50);
+
             const form = document.getElementById('projectForm');
             for (const key in row) { if (form.elements[key]) form.elements[key].value = row[key]; }
             document.getElementById('idField').value = row['ID'];
