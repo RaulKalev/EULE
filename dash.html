@@ -211,6 +211,34 @@
             }
         }
 
+        // --- NEW: COLOR PALETTE ---
+        function stringToColor(str) {
+            // Distinct High Contrast Palette (Tailwind 600 shades)
+            const palette = [
+                '#2563EB', // Blue
+                '#DC2626', // Red
+                '#059669', // Emerald
+                '#D97706', // Amber
+                '#7C3AED', // Violet
+                '#DB2777', // Pink
+                '#0891B2', // Cyan
+                '#EA580C', // Orange
+                '#4F46E5', // Indigo
+                '#65A30D', // Lime
+                '#0D9488', // Teal
+                '#C026D3', // Fuchsia
+                '#CA8A04', // Yellow
+                '#4B5563'  // Gray
+            ];
+            
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) {
+                hash = str.charCodeAt(i) + ((hash << 5) - hash);
+            }
+            const index = Math.abs(hash) % palette.length;
+            return palette[index];
+        }
+
         // HELPERS
         function getUniqueUsers(str) {
             if (!str) return [];
@@ -466,14 +494,6 @@
                 `;
                 tbody.appendChild(tr);
             });
-        }
-
-        // CHARTS
-        function stringToColor(str) {
-            let hash = 0;
-            for (let i = 0; i < str.length; i++) { hash = str.charCodeAt(i) + ((hash << 5) - hash); }
-            const h = Math.abs(hash % 360);
-            return `hsl(${h}, 70%, 60%)`;
         }
 
         function updateCharts(data) {
