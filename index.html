@@ -5,221 +5,347 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Töövoogude Keskus • EULE</title>
     <link rel="stylesheet" href="assets/css/styles.css">
+    
+    <style>
+      /* --- Modal (Hüpikaken) stiilid --- */
+      .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.6); /* Tume taust */
+        z-index: 9999; /* Alati kõige peal */
+        display: none; /* Vaikimisi peidetud */
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+        backdrop-filter: blur(4px); /* Hägustab tausta */
+      }
+
+      .modal-overlay.active {
+        display: flex;
+      }
+
+      .modal-card {
+        background: white;
+        width: 100%;
+        max-width: 450px;
+        border-radius: 12px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        position: relative;
+        overflow: hidden;
+        animation: slideUp 0.3s ease-out;
+      }
+
+      @keyframes slideUp {
+        from { transform: translateY(20px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+      }
+
+      .modal-header {
+        background: #f8f9fa;
+        padding: 15px 20px;
+        border-bottom: 1px solid #eee;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .modal-header h3 {
+        margin: 0;
+        font-size: 1.2rem;
+        color: #333;
+      }
+
+      .close-btn {
+        background: none;
+        border: none;
+        font-size: 2rem;
+        line-height: 1;
+        color: #999;
+        cursor: pointer;
+      }
+      .close-btn:hover { color: #333; }
+
+      .modal-body {
+        padding: 20px;
+      }
+
+      /* --- Kalkulaatori sisemised stiilid --- */
+      .calc-label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #666;
+        font-weight: 500;
+        font-size: 0.9rem;
+      }
+      .calc-input {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 1.25rem;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        box-sizing: border-box;
+        font-size: 16px;
+      }
+      .calc-results {
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid #eee;
+      }
+      .calc-result-item {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.8rem;
+        font-size: 1rem;
+      }
+      .calc-val {
+        font-weight: bold;
+        color: #333;
+      }
+      .calc-val.highlight { color: #007bff; }
+      
+      .calc-error {
+        color: #dc3545;
+        font-weight: bold;
+        text-align: center;
+        display: none;
+        margin-bottom: 1rem;
+        font-size: 0.9rem;
+        background: #fff5f5;
+        padding: 8px;
+        border-radius: 4px;
+      }
+
+      .calc-explanation {
+        margin-top: 1.5rem;
+        padding: 10px;
+        background-color: #f8f9fa;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        color: #555;
+      }
+      .calc-formula {
+        font-family: monospace;
+        background: #eee;
+        padding: 2px 5px;
+        border-radius: 3px;
+      }
+    </style>
   </head>
   <body>
-<!-- background stays as-is -->
-<div class="bg" aria-hidden="true"></div>
+    <div class="bg" aria-hidden="true"></div>
 
-<!-- NEW: two-column page grid: left sidebar + main container -->
-<div class="page">
-  <!-- LEFT SIDEBAR (full height, attached to left edge) -->
-  <aside class="sidebar">
-    <div class="side-panel glass">
-      <button class="side-toggle" aria-controls="linklist" aria-expanded="true" title="Ahenda/ava lingid">
-        <span class="lbl">≡</span>
-      </button>
+    <div class="page">
+      <aside class="sidebar">
+        <div class="side-panel glass">
+          <button class="side-toggle" aria-controls="linklist" aria-expanded="true" title="Ahenda/ava lingid">
+            <span class="lbl">≡</span>
+          </button>
 
-      <h2 class="side-title">Lingid</h2>
-      <nav id="linklist" class="side-links">
-        <a class="side-link" target="_blank" rel="noopener" href="https://chatgpt.com/g/g-uOod2UnzE-standardid">Standardite AI</a>
-        <a class="side-link" target="_blank" rel="noopener" href="https://tartu.ee/sites/default/files/uploads/Ehitusprojekti%20failide%20vormistamise%20juhend.pdf">EHR faili nimetamise juhend</a>
-        <a class="side-link" target="_blank" rel="noopener" href="https://nouded.rkas.ee/">RKAS-i nõuded</a>
-        <a class="side-link" target="_blank" rel="noopener" href="https://elektriprojekteerimine.info/">Elektriprojekteerimise juhend</a>
-      </nav>
-    </div>
-  </aside>        <div class="container" id="app">
-      <header class="topbar">
-        <div class="brand">
-          <div class="logo-wrap" aria-hidden="true">
-            <img src="assets/logos/eule-logo.png" alt="EULE logo"
-              class="logo-obj" />
-          </div>
-          <div class="brand-text">
-            <div class="brand-line">
-              <span class="brand-name">EULE juhendid ja töövood</span>
+          <h2 class="side-title">Lingid</h2>
+          <nav id="linklist" class="side-links">
+            <a class="side-link" target="_blank" rel="noopener" href="https://chatgpt.com/g/g-uOod2UnzE-standardid">Standardite AI</a>
+            <a class="side-link" target="_blank" rel="noopener" href="https://tartu.ee/sites/default/files/uploads/Ehitusprojekti%20failide%20vormistamise%20juhend.pdf">EHR faili nimetamise juhend</a>
+            <a class="side-link" target="_blank" rel="noopener" href="https://nouded.rkas.ee/">RKAS-i nõuded</a>
+            <a class="side-link" target="_blank" rel="noopener" href="https://elektriprojekteerimine.info/">Elektriprojekteerimise juhend</a>
+          </nav>
+
+          <div style="margin-top: 2rem;"></div> <h2 class="side-title">Kalkulaatorid</h2>
+          <nav class="side-links">
+            <a class="side-link" href="#" onclick="openCalculator(event)">Häiresireeni levi</a>
+          </nav>
+
+        </div>
+      </aside>
+      
+      <div class="container" id="app">
+        <header class="topbar">
+          <div class="brand">
+            <div class="logo-wrap" aria-hidden="true">
+              <img src="assets/logos/eule-logo.png" alt="EULE logo" class="logo-obj" />
+            </div>
+            <div class="brand-text">
+              <div class="brand-line">
+                <span class="brand-name">EULE juhendid ja töövood</span>
+              </div>
             </div>
           </div>
-        </div>
-        <div class="actions">
-          <label class="switch" aria-label="Lülita teema">
-            <input id="themeSwitch" type="checkbox" aria-checked="false" />
-            <span class="track" aria-hidden="true"></span>
-            <span class="thumb" aria-hidden="true"></span>
-          </label>
-        </div>
-      </header>
+          <div class="actions">
+            <label class="switch" aria-label="Lülita teema">
+              <input id="themeSwitch" type="checkbox" aria-checked="false" />
+              <span class="track" aria-hidden="true"></span>
+              <span class="thumb" aria-hidden="true"></span>
+            </label>
+          </div>
+        </header>
 
-      <!-- Primary navigation -->
-      <nav class="primary" aria-label="Põhinavigatsioon">
-        <a class="navbtn" href="dash.html">Projektid</a>
-        <a class="navbtn" href="#revit">Revit</a>
-        <a class="navbtn" href="#autocad">Autocad</a>
-        <a class="navbtn" href="#Üldjuhendid">Üldjuhendid</a>
-        <a class="navbtn" href="#naidised">Näidised</a>
-      </nav>
+        <nav class="primary" aria-label="Põhinavigatsioon">
+          <a class="navbtn" href="dash.html">Projektid</a>
+          <a class="navbtn" href="#revit">Revit</a>
+          <a class="navbtn" href="#autocad">Autocad</a>
+          <a class="navbtn" href="#Üldjuhendid">Üldjuhendid</a>
+          <a class="navbtn" href="#naidised">Näidised</a>
+        </nav>
 
-    <!-- Main column -->
         <main class="content">
           <div class="search">
-            <input id="search" type="search"
-              placeholder="Otsi" />
+            <input id="search" type="search" placeholder="Otsi" />
           </div>
 
-          <!-- Sections (infinite scroll simply by stacking) -->
-          <section id="revit"
-            data-keywords="revit sheets eksport dwg pdf family">
+          <section id="revit" data-keywords="revit sheets eksport dwg pdf family">
             <h2 class="section-title">Revit</h2>
-
-            <article class="wf-card" data-title="Kiirkäsklused"
-              data-pdf="assets/pdfs/revit/Juhend_Kiirkäsklused.pdf">
-              <div class="wf-head"><div class="wf-title">Kiirkäsklused</div><div
-                  class="wf-ind">klõpsa, et avada</div></div>
-              <div class="wf-body"><div class="pdfwrap"><iframe
-                    loading="lazy"></iframe></div></div>
+            <article class="wf-card" data-title="Kiirkäsklused" data-pdf="assets/pdfs/revit/Juhend_Kiirkäsklused.pdf">
+              <div class="wf-head"><div class="wf-title">Kiirkäsklused</div><div class="wf-ind">klõpsa, et avada</div></div>
+              <div class="wf-body"><div class="pdfwrap"><iframe loading="lazy"></iframe></div></div>
             </article>
-
-            <article class="wf-card" data-title="Jooniste nimetamine"
-              data-pdf="assets/pdfs/revit/Juhend_Jooniste_Nimetamine.pdf">
-              <div class="wf-head"><div class="wf-title">Jooniste
-                  nimetamine</div><div class="wf-ind">klõpsa, et
-                  avada</div></div>
-              <div class="wf-body"><div class="pdfwrap"><iframe
-                    loading="lazy"></iframe></div></div>
+            <article class="wf-card" data-title="Jooniste nimetamine" data-pdf="assets/pdfs/revit/Juhend_Jooniste_Nimetamine.pdf">
+                <div class="wf-head"><div class="wf-title">Jooniste nimetamine</div><div class="wf-ind">klõpsa, et avada</div></div>
+                <div class="wf-body"><div class="pdfwrap"><iframe loading="lazy"></iframe></div></div>
             </article>
-
-            <article class="wf-card" data-title="Kilbiskeemi lehtede loomine"
-              data-pdf="assets/pdfs/revit/Juhend_KilbiskeemiLehtede_Loomine.pdf">
-              <div class="wf-head"><div class="wf-title">Kilbiskeemi lehtede
-                  loomine</div><div class="wf-ind">klõpsa, et avada</div></div>
-              <div class="wf-body"><div class="pdfwrap"><iframe
-                    loading="lazy"></iframe></div></div>
-            </article>
-
-            <article class="wf-card" data-title="Jooniste printimine"
-              data-pdf="assets/pdfs/revit/Juhend_Jooniste_Printimine.pdf">
-              <div class="wf-head"><div class="wf-title">Jooniste
-                  printimine</div><div class="wf-ind">klõpsa, et
-                  avada</div></div>
-              <div class="wf-body"><div class="pdfwrap"><iframe
-                    loading="lazy"></iframe></div></div>
-            </article>
-
-            <article class="wf-card" data-title="Mudeli eksport"
-              data-pdf="assets/pdfs/revit/Juhend_Mudeli_Eksport.pdf">
-              <div class="wf-head"><div class="wf-title">Mudeli
-                  eksport</div><div
-                  class="wf-ind">klõpsa, et avada</div></div>
-              <div class="wf-body"><div class="pdfwrap"><iframe
-                    loading="lazy"></iframe></div></div>
-            </article>
-
-            <article class="wf-card" data-title="Versiooni number"
-              data-pdf="assets/pdfs/revit/Juhend_Versiooni_Number.pdf">
-              <div class="wf-head"><div class="wf-title">Versiooni
-                  number</div><div
-                  class="wf-ind">klõpsa, et avada</div></div>
-              <div class="wf-body"><div class="pdfwrap"><iframe
-                    loading="lazy"></iframe></div></div>
-            </article>
-
-            <article class="wf-card" data-title="DWG Lisamine vaatele"
-              data-pdf="assets/pdfs/revit/Juhend_DWG_Lisamine_Vaatele.pdf">
-              <div class="wf-head"><div class="wf-title">DWG Lisamine
-                  vaatele</div><div
-                  class="wf-ind">klõpsa, et avada</div></div>
-              <div class="wf-body"><div class="pdfwrap"><iframe
-                    loading="lazy"></iframe></div></div>
-            </article>
-
-            <article class="wf-card" data-title="Andmesisu täitmine"
-              data-pdf="assets/pdfs/revit/Juhend_Versiooni_Number.pdf">
-              <div class="wf-head"><div class="wf-title">Andmesisu
-                  täitmine</div><div
-                  class="wf-ind">klõpsa, et avada</div></div>
-              <div class="wf-body"><div class="pdfwrap"><iframe
-                    loading="lazy"></iframe></div></div>
-            </article>
-
-            <article class="wf-card" data-title="Mudeli/Projekti loomine"
-              data-pdf="assets/pdfs/revit/Juhend_Mudeli_Loomine.pdf">
-              <div class="wf-head"><div class="wf-title">Mudeli/Projekti loomine</div><div
-                  class="wf-ind">klõpsa, et avada</div></div>
-              <div class="wf-body"><div class="pdfwrap"><iframe
-                    loading="lazy"></iframe></div></div>
-            </article>
-          </section>
+            </section>
 
           <section id="autocad" data-keywords="autocad plot pc3 layer dwg">
             <h2 class="section-title">Autocad</h2>
-            <article class="wf-card" data-title="DWG-de liitmine"
-              data-pdf="assets/pdfs/autocad/Juhend_DWG_Liitmine.pdf">
-              <div class="wf-head"><div class="wf-title">DWG-de
-                  liitmine</div><div
-                  class="wf-ind">klõpsa, et avada</div></div>
-              <div class="wf-body"><div class="pdfwrap"><iframe
-                    loading="lazy"></iframe></div></div>
+            <article class="wf-card" data-title="DWG-de liitmine" data-pdf="assets/pdfs/autocad/Juhend_DWG_Liitmine.pdf">
+              <div class="wf-head"><div class="wf-title">DWG-de liitmine</div><div class="wf-ind">klõpsa, et avada</div></div>
+              <div class="wf-body"><div class="pdfwrap"><iframe loading="lazy"></iframe></div></div>
             </article>
+            </section>
 
-            <article class="wf-card" data-title="Mitme bloki sisu muutmine"
-              data-pdf="assets/pdfs/autocad/Juhend_AutocadiBlokkideMuutmine.pdf">
-              <div class="wf-head"><div class="wf-title">Mitme bloki sisu
-                  muutmine</div><div class="wf-ind">klõpsa, et
-                  avada</div></div>
-              <div class="wf-body"><div class="pdfwrap"><iframe
-                    loading="lazy"></iframe></div></div>
-            </article>
-
-          </section>
-
-          <section id="Üldjuhendid"
-            data-keywords="Üldjuhendid">
+          <section id="Üldjuhendid" data-keywords="Üldjuhendid">
             <h2 class="section-title">Üldjuhendid</h2>
-
-            <article class="wf-card" data-title="Reviti pluginad"
-              data-pdf="assets/pdfs/windows/Juhend_Reviti_Pluginad.pdf">
-              <div class="wf-head">
-                <div class="wf-title">Reviti pluginad</div>
-                <div class="wf-ind">klõpsa, et avada</div>
-              </div>
-              <div class="wf-body">
-                <div class="pdfwrap"><iframe loading="lazy"></iframe></div>
-              </div>
+            <article class="wf-card" data-title="Reviti pluginad" data-pdf="assets/pdfs/windows/Juhend_Reviti_Pluginad.pdf">
+                <div class="wf-head"><div class="wf-title">Reviti pluginad</div><div class="wf-ind">klõpsa, et avada</div></div>
+                <div class="wf-body"><div class="pdfwrap"><iframe loading="lazy"></iframe></div></div>
             </article>
+             </section>
 
-            <article class="wf-card" data-title="Tööarvuti seadistuse juhend"
-              data-pdf="assets/pdfs/windows/Juhend_Arvuti_Seadistamine.pdf">
-              <div class="wf-head"><div class="wf-title">Tööarvuti seadistuse
-                  juhend</div><div class="wf-ind">klõpsa, et avada</div></div>
-              <div class="wf-body"><div class="pdfwrap"><iframe
-                    loading="lazy"></iframe></div></div>
-            </article>
-
-            <article class="wf-card" data-title="Dropboxi kasutamise juhend"
-              data-pdf="assets/pdfs/windows/windows_setup.pdf">
-              <div class="wf-head"><div class="wf-title">Dropboxi kasutamise
-                  juhend</div><div class="wf-ind">klõpsa, et avada</div></div>
-              <div class="wf-body"><div class="pdfwrap"><iframe
-                    loading="lazy"></iframe></div></div>
-            </article>
-          </section>
-
-          <section id="naidised"
-            data-keywords="näidised vormid mallid standardid">
+          <section id="naidised" data-keywords="näidised vormid mallid standardid">
             <h2 class="section-title">Näidised</h2>
-            <article class="wf-card" data-title="Projekti dokumentide näidised"
-              data-pdf="assets/pdfs/naidised/samples_docs.pdf">
-              <div class="wf-head"><div class="wf-title">Projekti dokumentide
-                  näidised</div><div class="wf-ind">klõpsa, et avada</div></div>
-              <div class="wf-body"><div class="pdfwrap"><iframe
-                    loading="lazy"></iframe></div></div>
+            <article class="wf-card" data-title="Projekti dokumentide näidised" data-pdf="assets/pdfs/naidised/samples_docs.pdf">
+              <div class="wf-head"><div class="wf-title">Projekti dokumentide näidised</div><div class="wf-ind">klõpsa, et avada</div></div>
+              <div class="wf-body"><div class="pdfwrap"><iframe loading="lazy"></iframe></div></div>
             </article>
           </section>
-        </main> <!-- ✅ close main here -->
 
+        </main>
       </div>
+    </div>
 
+    <div id="calculatorModal" class="modal-overlay" onclick="closeCalculator(event)">
+      <div class="modal-card" onclick="event.stopPropagation()">
+        
+        <div class="modal-header">
+          <h3>Häiresireeni levi</h3>
+          <button class="close-btn" onclick="closeCalculator(null)">×</button>
+        </div>
+
+        <div class="modal-body">
+            <label class="calc-label" for="dbSpec">Toote spetsifikatsioon (dB @ 1m)</label>
+            <input class="calc-input" type="number" id="dbSpec" value="100" placeholder="nt. 100" oninput="calculateSiren()">
+        
+            <label class="calc-label" for="minDb">Nõutav min helitugevus (äärel)</label>
+            <input class="calc-input" type="number" id="minDb" value="65" placeholder="nt. 65" oninput="calculateSiren()">
+        
+            <label class="calc-label" for="height">Paigalduskõrgus (meetrit)</label>
+            <input class="calc-input" type="number" id="height" value="2.4" step="0.1" placeholder="nt. 2.4" oninput="calculateSiren()">
+        
+            <div class="calc-results">
+                <div class="calc-error" id="errorMsg">Viga: Sireen on liiga kõrgel või liiga nõrk!</div>
+                
+                <div class="calc-result-item">
+                    <span>Max kaugus (õhus):</span>
+                    <span class="calc-val" id="distResult">0 m</span>
+                </div>
+                <div class="calc-result-item">
+                    <span>Raadius põrandal:</span>
+                    <span class="calc-val highlight" id="radResult">0 m</span>
+                </div>
+                <div class="calc-result-item">
+                    <span>Katvusala:</span>
+                    <span class="calc-val" id="areaResult">0 m²</span>
+                </div>
+            </div>
+        
+            <div class="calc-explanation">
+                <strong>Arvutuskäik (Ohutusvaru -6dB):</strong><br>
+                Kalkulaator kasutab pöörruutseadust. Ohutuse tagamiseks lahutatakse spetsifikatsioonist automaatselt 6dB.<br>
+                <span class="calc-formula">d = 10 ^ ((dB_sisend - 6 - dB_min) / 20)</span>
+            </div>
+        </div>
+      </div>
     </div>
 
     <script src="assets/js/app.js"></script>
+
+    <script>
+        // --- 1. Akna avamine ja sulgemine ---
+        function openCalculator(e) {
+            e.preventDefault(); // Väldib lehe üles hüppamist lingile vajutades
+            document.getElementById('calculatorModal').classList.add('active');
+            calculateSiren(); // Arvuta kohe avamisel
+        }
+
+        function closeCalculator(e) {
+            // Kui event on olemas (klikk taustal), siis kontrolli, et see poleks sisu
+            document.getElementById('calculatorModal').classList.remove('active');
+        }
+
+        // --- 2. Arvutusloogika ---
+        function calculateSiren() {
+            const safetyMargin = 6; 
+            
+            const dbSpecInput = document.getElementById('dbSpec').value;
+            const minDbInput = document.getElementById('minDb').value;
+            const heightInput = document.getElementById('height').value;
+
+            if (dbSpecInput === '' || minDbInput === '' || heightInput === '') return;
+
+            const dbSpec = parseFloat(dbSpecInput);
+            const minDb = parseFloat(minDbInput);
+            const height = parseFloat(heightInput);
+
+            if (isNaN(dbSpec) || isNaN(minDb) || isNaN(height)) return;
+
+            const effectiveDb = dbSpec - safetyMargin;
+            const dbDiff = effectiveDb - minDb;
+            
+            if (dbDiff < 0) {
+                updateCalcUI(0, 0, 0, true);
+                return;
+            }
+
+            const maxDist = Math.pow(10, dbDiff / 20);
+
+            let radius = 0;
+            let isError = false;
+
+            if (maxDist < height) {
+                radius = 0;
+                isError = true;
+            } else {
+                radius = Math.sqrt(Math.pow(maxDist, 2) - Math.pow(height, 2));
+            }
+
+            const area = Math.PI * Math.pow(radius, 2);
+            updateCalcUI(maxDist, radius, area, isError);
+        }
+
+        function updateCalcUI(dist, rad, area, isError) {
+            const errorMsg = document.getElementById('errorMsg');
+            
+            if (isError) {
+                errorMsg.style.display = 'block';
+            } else {
+                errorMsg.style.display = 'none';
+            }
+
+            document.getElementById('distResult').innerText = dist.toFixed(2) + " m";
+            document.getElementById('radResult').innerText = rad.toFixed(2) + " m";
+            document.getElementById('areaResult').innerText = area.toFixed(2) + " m²";
+        }
+    </script>
   </body>
 </html>
