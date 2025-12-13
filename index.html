@@ -7,6 +7,40 @@
     <link rel="stylesheet" href="assets/css/styles.css">
     
     <style>
+      /* --- VÄRVISÜSTEEM (Light/Dark) --- */
+      :root {
+        --modal-bg: #ffffff;
+        --modal-text: #333333;
+        --modal-header-bg: #f8f9fa;
+        --modal-border: #eeeeee;
+        --input-bg: #ffffff;
+        --input-border: #dddddd;
+        --input-text: #333333;
+        --table-th-bg: #2c3e50;
+        --table-th-text: #ffffff;
+        --table-stripe: #fbfbfb;
+        --table-hover: #f1f8ff;
+        --calc-bg: #f8f9fa;
+        --calc-text: #555555;
+      }
+
+      /* Tume režiim (kui body'l on klass "dark-mode") */
+      body.dark-mode {
+        --modal-bg: #1e1e1e;
+        --modal-text: #e0e0e0;
+        --modal-header-bg: #252526;
+        --modal-border: #333333;
+        --input-bg: #2d2d2d;
+        --input-border: #444444;
+        --input-text: #ffffff;
+        --table-th-bg: #111111;
+        --table-th-text: #cccccc;
+        --table-stripe: #252526;
+        --table-hover: #2a2d2e;
+        --calc-bg: #2d2d2d;
+        --calc-text: #cccccc;
+      }
+
       /* --- Modal (Hüpikaken) stiilid --- */
       .modal-overlay {
         position: fixed;
@@ -14,13 +48,13 @@
         left: 0;
         width: 100%;
         height: 100%;
-        background-color: rgba(0, 0, 0, 0.6); /* Tume taust */
-        z-index: 9999; /* Alati kõige peal */
-        display: none; /* Vaikimisi peidetud */
+        background-color: rgba(0, 0, 0, 0.6);
+        z-index: 9999;
+        display: none;
         justify-content: center;
         align-items: center;
         padding: 20px;
-        backdrop-filter: blur(4px); /* Hägustab tausta */
+        backdrop-filter: blur(4px);
       }
 
       .modal-overlay.active {
@@ -28,20 +62,21 @@
       }
 
       .modal-card {
-        background: white;
+        background: var(--modal-bg);
+        color: var(--modal-text);
         width: 100%;
         max-width: 450px;
         border-radius: 12px;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.3);
         position: relative;
         overflow: hidden;
         animation: slideUp 0.3s ease-out;
         display: flex;
         flex-direction: column;
-        max-height: 90vh; /* Et ei läheks üle ekraani */
+        max-height: 90vh;
+        border: 1px solid var(--modal-border);
       }
 
-      /* UUS: Laiem modal tabeli jaoks */
       .modal-card.large {
         max-width: 900px;
         width: 95%;
@@ -53,9 +88,9 @@
       }
 
       .modal-header {
-        background: #f8f9fa;
+        background: var(--modal-header-bg);
         padding: 15px 20px;
-        border-bottom: 1px solid #eee;
+        border-bottom: 1px solid var(--modal-border);
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -65,7 +100,7 @@
       .modal-header h3 {
         margin: 0;
         font-size: 1.2rem;
-        color: #333;
+        color: var(--modal-text);
       }
 
       .close-btn {
@@ -75,19 +110,21 @@
         line-height: 1;
         color: #999;
         cursor: pointer;
+        transition: color 0.2s;
       }
-      .close-btn:hover { color: #333; }
+      .close-btn:hover { color: var(--modal-text); }
 
       .modal-body {
         padding: 20px;
-        overflow-y: auto; /* Kerimine, kui sisu on pikk */
+        overflow-y: auto;
       }
 
       /* --- Kalkulaatori sisemised stiilid --- */
       .calc-label {
         display: block;
         margin-bottom: 0.5rem;
-        color: #666;
+        color: var(--modal-text);
+        opacity: 0.8;
         font-weight: 500;
         font-size: 0.9rem;
       }
@@ -95,7 +132,9 @@
         width: 100%;
         padding: 10px;
         margin-bottom: 1.25rem;
-        border: 1px solid #ddd;
+        border: 1px solid var(--input-border);
+        background-color: var(--input-bg);
+        color: var(--input-text);
         border-radius: 6px;
         box-sizing: border-box;
         font-size: 16px;
@@ -103,28 +142,29 @@
       .calc-results {
         margin-top: 1rem;
         padding-top: 1rem;
-        border-top: 1px solid #eee;
+        border-top: 1px solid var(--modal-border);
       }
       .calc-result-item {
         display: flex;
         justify-content: space-between;
         margin-bottom: 0.8rem;
         font-size: 1rem;
+        color: var(--modal-text);
       }
       .calc-val {
         font-weight: bold;
-        color: #333;
+        color: var(--modal-text);
       }
-      .calc-val.highlight { color: #007bff; }
+      .calc-val.highlight { color: #3498db; }
       
       .calc-error {
-        color: #dc3545;
+        color: #e74c3c;
         font-weight: bold;
         text-align: center;
         display: none;
         margin-bottom: 1rem;
         font-size: 0.9rem;
-        background: #fff5f5;
+        background: rgba(231, 76, 60, 0.1);
         padding: 8px;
         border-radius: 4px;
       }
@@ -132,52 +172,65 @@
       .calc-explanation {
         margin-top: 1.5rem;
         padding: 10px;
-        background-color: #f8f9fa;
+        background-color: var(--calc-bg);
         border-radius: 6px;
         font-size: 0.85rem;
-        color: #555;
+        color: var(--calc-text);
       }
       .calc-formula {
         font-family: monospace;
-        background: #eee;
+        background: rgba(0,0,0,0.05);
         padding: 2px 5px;
         border-radius: 3px;
+        color: var(--modal-text);
       }
 
-      /* --- UUS: Nõuete tabeli stiilid --- */
+      /* --- Nõuete tabeli stiilid --- */
       .tabs { display: flex; justify-content: center; margin-bottom: 20px; gap: 10px; flex-wrap: wrap; }
       .tab-button {
-          padding: 8px 16px; cursor: pointer; border: none; background-color: #e0e0e0; 
+          padding: 8px 16px; cursor: pointer; border: none; 
+          background-color: var(--modal-header-bg); 
+          color: var(--modal-text);
+          border: 1px solid var(--modal-border);
           font-size: 14px; border-radius: 20px; transition: 0.3s; font-weight: 500;
       }
-      .tab-button:hover { background-color: #d0d0d0; }
-      .tab-button.active { background-color: #3498db; color: white; }
+      .tab-button:hover { filter: brightness(90%); }
+      .tab-button.active { background-color: #3498db; color: white; border-color: #3498db; }
 
       .table-container { 
           overflow-x: auto; 
           border-radius: 8px; 
-          border: 1px solid #eee;
+          border: 1px solid var(--modal-border);
       }
       .req-table { width: 100%; border-collapse: collapse; min-width: 600px; font-size: 14px; }
-      .req-table th, .req-table td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #ecf0f1; vertical-align: top; }
       .req-table th { 
-          background-color: #2c3e50; 
-          color: white; 
+          background-color: var(--table-th-bg); 
+          color: var(--table-th-text); 
+          padding: 12px 15px; 
+          text-align: left; 
           position: sticky; 
           top: 0; 
           font-weight: 600;
       }
-      .req-table tr:nth-child(even) { background-color: #fbfbfb; }
+      .req-table td {
+          padding: 12px 15px;
+          text-align: left;
+          border-bottom: 1px solid var(--modal-border);
+          vertical-align: top;
+          color: var(--modal-text);
+      }
+      .req-table tr:nth-child(even) { background-color: var(--table-stripe); }
+      .req-table tr:hover { background-color: var(--table-hover); }
       
-      /* Staatuse stiilid tabelis */
+      /* Staatuse märk */
       .status-badge {
           padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; text-transform: uppercase;
       }
-      .status-false { background-color: #ffebee; color: #c0392b; }
-      .status-true { background-color: #e8f8f5; color: #27ae60; }
+      .status-false { background-color: rgba(231, 76, 60, 0.2); color: #e74c3c; }
+      .status-true { background-color: rgba(39, 174, 96, 0.2); color: #27ae60; }
       
-      #req-loader { text-align: center; margin: 20px; color: #666; display: none; }
-      #req-row-count { text-align: right; margin-bottom: 10px; font-size: 12px; color: #999; }
+      #req-loader { text-align: center; margin: 20px; color: var(--modal-text); display: none; }
+      #req-row-count { text-align: right; margin-bottom: 10px; font-size: 12px; color: var(--calc-text); }
 
     </style>
   </head>
@@ -248,50 +301,17 @@
 
           <section id="revit" data-keywords="revit sheets eksport dwg pdf family">
             <h2 class="section-title">Revit</h2>
-
             <article class="wf-card" data-title="Kiirkäsklused" data-pdf="assets/pdfs/revit/Juhend_Kiirkäsklused.pdf">
               <div class="wf-head"><div class="wf-title">Kiirkäsklused</div><div class="wf-ind">klõpsa, et avada</div></div>
               <div class="wf-body"><div class="pdfwrap"><iframe loading="lazy"></iframe></div></div>
             </article>
-
             <article class="wf-card" data-title="Jooniste nimetamine" data-pdf="assets/pdfs/revit/Juhend_Jooniste_Nimetamine.pdf">
               <div class="wf-head"><div class="wf-title">Jooniste nimetamine</div><div class="wf-ind">klõpsa, et avada</div></div>
               <div class="wf-body"><div class="pdfwrap"><iframe loading="lazy"></iframe></div></div>
             </article>
-
-            <article class="wf-card" data-title="Kilbiskeemi lehtede loomine" data-pdf="assets/pdfs/revit/Juhend_KilbiskeemiLehtede_Loomine.pdf">
-              <div class="wf-head"><div class="wf-title">Kilbiskeemi lehtede loomine</div><div class="wf-ind">klõpsa, et avada</div></div>
-              <div class="wf-body"><div class="pdfwrap"><iframe loading="lazy"></iframe></div></div>
-            </article>
-
-            <article class="wf-card" data-title="Jooniste printimine" data-pdf="assets/pdfs/revit/Juhend_Jooniste_Printimine.pdf">
-              <div class="wf-head"><div class="wf-title">Jooniste printimine</div><div class="wf-ind">klõpsa, et avada</div></div>
-              <div class="wf-body"><div class="pdfwrap"><iframe loading="lazy"></iframe></div></div>
-            </article>
-
-            <article class="wf-card" data-title="Mudeli eksport" data-pdf="assets/pdfs/revit/Juhend_Mudeli_Eksport.pdf">
-              <div class="wf-head"><div class="wf-title">Mudeli eksport</div><div class="wf-ind">klõpsa, et avada</div></div>
-              <div class="wf-body"><div class="pdfwrap"><iframe loading="lazy"></iframe></div></div>
-            </article>
-
-            <article class="wf-card" data-title="Versiooni number" data-pdf="assets/pdfs/revit/Juhend_Versiooni_Number.pdf">
-              <div class="wf-head"><div class="wf-title">Versiooni number</div><div class="wf-ind">klõpsa, et avada</div></div>
-              <div class="wf-body"><div class="pdfwrap"><iframe loading="lazy"></iframe></div></div>
-            </article>
-
-            <article class="wf-card" data-title="DWG Lisamine vaatele" data-pdf="assets/pdfs/revit/Juhend_DWG_Lisamine_Vaatele.pdf">
-              <div class="wf-head"><div class="wf-title">DWG Lisamine vaatele</div><div class="wf-ind">klõpsa, et avada</div></div>
-              <div class="wf-body"><div class="pdfwrap"><iframe loading="lazy"></iframe></div></div>
-            </article>
-
             <article class="wf-card" data-title="Andmesisu täitmine" data-pdf="assets/pdfs/revit/Juhend_Versiooni_Number.pdf">
-              <div class="wf-head"><div class="wf-title">Andmesisu täitmine</div><div class="wf-ind">klõpsa, et avada</div></div>
-              <div class="wf-body"><div class="pdfwrap"><iframe loading="lazy"></iframe></div></div>
-            </article>
-
-            <article class="wf-card" data-title="Mudeli/Projekti loomine" data-pdf="assets/pdfs/revit/Juhend_Mudeli_Loomine.pdf">
-              <div class="wf-head"><div class="wf-title">Mudeli/Projekti loomine</div><div class="wf-ind">klõpsa, et avada</div></div>
-              <div class="wf-body"><div class="pdfwrap"><iframe loading="lazy"></iframe></div></div>
+                <div class="wf-head"><div class="wf-title">Andmesisu täitmine</div><div class="wf-ind">klõpsa, et avada</div></div>
+                <div class="wf-body"><div class="pdfwrap"><iframe loading="lazy"></iframe></div></div>
             </article>
           </section>
 
@@ -301,36 +321,12 @@
               <div class="wf-head"><div class="wf-title">DWG-de liitmine</div><div class="wf-ind">klõpsa, et avada</div></div>
               <div class="wf-body"><div class="pdfwrap"><iframe loading="lazy"></iframe></div></div>
             </article>
-
-            <article class="wf-card" data-title="Mitme bloki sisu muutmine" data-pdf="assets/pdfs/autocad/Juhend_AutocadiBlokkideMuutmine.pdf">
-              <div class="wf-head"><div class="wf-title">Mitme bloki sisu muutmine</div><div class="wf-ind">klõpsa, et avada</div></div>
-              <div class="wf-body"><div class="pdfwrap"><iframe loading="lazy"></iframe></div></div>
-            </article>
           </section>
 
           <section id="Üldjuhendid" data-keywords="Üldjuhendid">
             <h2 class="section-title">Üldjuhendid</h2>
-
-            <article class="wf-card" data-title="Reviti pluginad" data-pdf="assets/pdfs/windows/Juhend_Reviti_Pluginad.pdf">
-              <div class="wf-head"><div class="wf-title">Reviti pluginad</div><div class="wf-ind">klõpsa, et avada</div></div>
-              <div class="wf-body"><div class="pdfwrap"><iframe loading="lazy"></iframe></div></div>
-            </article>
-
             <article class="wf-card" data-title="Tööarvuti seadistuse juhend" data-pdf="assets/pdfs/windows/Juhend_Arvuti_Seadistamine.pdf">
               <div class="wf-head"><div class="wf-title">Tööarvuti seadistuse juhend</div><div class="wf-ind">klõpsa, et avada</div></div>
-              <div class="wf-body"><div class="pdfwrap"><iframe loading="lazy"></iframe></div></div>
-            </article>
-
-            <article class="wf-card" data-title="Dropboxi kasutamise juhend" data-pdf="assets/pdfs/windows/windows_setup.pdf">
-              <div class="wf-head"><div class="wf-title">Dropboxi kasutamise juhend</div><div class="wf-ind">klõpsa, et avada</div></div>
-              <div class="wf-body"><div class="pdfwrap"><iframe loading="lazy"></iframe></div></div>
-            </article>
-          </section>
-
-          <section id="naidised" data-keywords="näidised vormid mallid standardid">
-            <h2 class="section-title">Näidised</h2>
-            <article class="wf-card" data-title="Projekti dokumentide näidised" data-pdf="assets/pdfs/naidised/samples_docs.pdf">
-              <div class="wf-head"><div class="wf-title">Projekti dokumentide näidised</div><div class="wf-ind">klõpsa, et avada</div></div>
               <div class="wf-body"><div class="pdfwrap"><iframe loading="lazy"></iframe></div></div>
             </article>
           </section>
@@ -339,25 +335,19 @@
 
     <div id="calculatorModal" class="modal-overlay" onclick="closeCalculator(event)">
       <div class="modal-card" onclick="event.stopPropagation()">
-        
         <div class="modal-header">
           <h3>Heli levi kalkulaator</h3>
           <button class="close-btn" onclick="closeCalculator(null)">×</button>
         </div>
-
         <div class="modal-body">
             <label class="calc-label" for="dbSpec">Toote spetsifikatsioon (dB @ 1m)</label>
             <input class="calc-input" type="number" id="dbSpec" value="100" placeholder="nt. 100" oninput="calculateSiren()">
-        
             <label class="calc-label" for="minDb">Nõutav min helitugevus (äärel)</label>
             <input class="calc-input" type="number" id="minDb" value="65" placeholder="nt. 65" oninput="calculateSiren()">
-        
             <label class="calc-label" for="height">Paigalduskõrgus (meetrit)</label>
             <input class="calc-input" type="number" id="height" value="2.4" step="0.1" placeholder="nt. 2.4" oninput="calculateSiren()">
-        
             <div class="calc-results">
                 <div class="calc-error" id="errorMsg">Viga: Sireen on liiga kõrgel või liiga nõrk!</div>
-                
                 <div class="calc-result-item">
                     <span>Max kaugus (õhus):</span>
                     <span class="calc-val" id="distResult">0 m</span>
@@ -371,10 +361,9 @@
                     <span class="calc-val" id="areaResult">0 m²</span>
                 </div>
             </div>
-        
             <div class="calc-explanation">
                 <strong>Arvutuskäik (Ohutusvaru -6dB):</strong><br>
-                Kalkulaator kasutab pöördruutsõltuvust. Ohutuse tagamiseks lahutatakse spetsifikatsioonist automaatselt 6dB.<br>
+                Kalkulaator kasutab pöördruutsõltuvust.<br>
                 <span class="calc-formula">d = 10 ^ ((dB_sisend - 6 - dB_min) / 20)</span>
             </div>
         </div>
@@ -383,22 +372,18 @@
 
     <div id="requirementsModal" class="modal-overlay" onclick="closeRequirements(event)">
         <div class="modal-card large" onclick="event.stopPropagation()">
-          
           <div class="modal-header">
             <h3>EN Nõrkvoolu projekti nõuded</h3>
             <button class="close-btn" onclick="closeRequirements(null)">×</button>
           </div>
-  
           <div class="modal-body">
               <div class="tabs">
                   <button class="tab-button active" onclick="fetchData('eelprojekt')">Eelprojekt</button>
                   <button class="tab-button" onclick="fetchData('pohiprojekt')">Põhiprojekt</button>
                   <button class="tab-button" onclick="fetchData('tooprojekt')">Tööprojekt</button>
               </div>
-  
               <div id="req-row-count"></div>
               <div id="req-loader">Laen andmeid...</div>
-  
               <div class="table-container">
                   <table class="req-table" id="req-table">
                       <thead></thead>
@@ -412,6 +397,25 @@
     <script src="assets/js/app.js"></script>
 
     <script>
+        // --- 0. DARK MODE LOGIC ---
+        const themeSwitch = document.getElementById('themeSwitch');
+        
+        // Kontrolli salvestatud eelistust
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark-mode');
+            themeSwitch.checked = true;
+        }
+
+        themeSwitch.addEventListener('change', function(e) {
+            if (e.target.checked) {
+                document.body.classList.add('dark-mode');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                document.body.classList.remove('dark-mode');
+                localStorage.setItem('theme', 'light');
+            }
+        });
+
         // --- 1. Kalkulaatori funktsioonid ---
         function openCalculator(e) {
             e.preventDefault();
@@ -425,7 +429,6 @@
 
         function calculateSiren() {
             const safetyMargin = 6; 
-            
             const dbSpecInput = document.getElementById('dbSpec').value;
             const minDbInput = document.getElementById('minDb').value;
             const heightInput = document.getElementById('height').value;
@@ -447,7 +450,6 @@
             }
 
             const maxDist = Math.pow(10, dbDiff / 20);
-
             let radius = 0;
             let isError = false;
 
@@ -464,33 +466,29 @@
 
         function updateCalcUI(dist, rad, area, isError) {
             const errorMsg = document.getElementById('errorMsg');
-            
             if (isError) {
                 errorMsg.style.display = 'block';
             } else {
                 errorMsg.style.display = 'none';
             }
-
             document.getElementById('distResult').innerText = dist.toFixed(2) + " m";
             document.getElementById('radResult').innerText = rad.toFixed(2) + " m";
             document.getElementById('areaResult').innerText = area.toFixed(2) + " m²";
         }
 
-        // --- 2. UUS: Nõuete modali ja andmete funktsioonid ---
-        
-        // Konfiguratsioon
+        // --- 2. Nõuete modali funktsioonid ---
         const SHEET_ID = '17akh6UeWbfy0NqJyZxAxcnXBLY5xXAJ4fMbJmsYSe_g'; 
         const SHEET_GIDS = {
             'eelprojekt': '0',
             'pohiprojekt': '1665761150',
             'tooprojekt': '1003177253'
         };
+        // Mida tabelis MITTE näidata
         const COLUMNS_TO_HIDE = ['ID', 'Staadium', 'Staatus', 'Staatus (Jah/Ei)', 'Kommentaar'];
 
         function openRequirements(e) {
             e.preventDefault();
             document.getElementById('requirementsModal').classList.add('active');
-            // Lae andmed esimesel avamisel (vaikimisi eelprojekt)
             fetchData('eelprojekt');
         }
 
@@ -499,7 +497,6 @@
         }
 
         function fetchData(stage) {
-            // UI nupud
             document.querySelectorAll('#requirementsModal .tab-button').forEach(btn => btn.classList.remove('active'));
             const clickedBtn = document.querySelector(`#requirementsModal button[onclick="fetchData('${stage}')"]`);
             if(clickedBtn) clickedBtn.classList.add('active');
@@ -509,14 +506,12 @@
             const tableBody = document.querySelector('#req-table tbody');
             const rowCountDisplay = document.getElementById('req-row-count');
 
-            // Puhasta vaade
             tableHead.innerHTML = '';
             tableBody.innerHTML = '';
             rowCountDisplay.innerText = '';
             loader.style.display = 'block';
 
             const gid = SHEET_GIDS[stage];
-            // JSONP päring
             const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=responseHandler:handleGoogleResponse&gid=${gid}&tq=SELECT *`;
 
             const oldScript = document.getElementById('gviz-script');
@@ -528,7 +523,6 @@
             document.body.appendChild(script);
         }
 
-        // Callback funktsioon Google'i vastuse jaoks
         window.handleGoogleResponse = function(response) {
             const loader = document.getElementById('req-loader');
             const tableHead = document.querySelector('#req-table thead');
@@ -553,9 +547,10 @@
             let skipIndices = []; 
 
             cols.forEach((col, index) => {
-                if (col.label && COLUMNS_TO_HIDE.includes(col.label)) {
+                // Peida tühjad või keelatud veerud
+                if (!col.label || COLUMNS_TO_HIDE.includes(col.label)) {
                     skipIndices.push(index);
-                } else if(col.label) {
+                } else {
                     headRow += `<th>${col.label}</th>`;
                 }
             });
@@ -564,7 +559,6 @@
 
             // 2. Sisu
             let allRowsHTML = ''; 
-
             rows.forEach(row => {
                 let tr = '<tr>';
                 if (row.c) {
@@ -578,7 +572,6 @@
                 tr += '</tr>';
                 allRowsHTML += tr;
             });
-
             tableBody.innerHTML = allRowsHTML;
         };
     </script>
