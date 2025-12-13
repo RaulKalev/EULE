@@ -7,48 +7,69 @@
     <link rel="stylesheet" href="assets/css/styles.css">
     
     <style>
-      /* --- VÄRVISÜSTEEM (Light/Dark) --- */
+      /* --- VÄRVISÜSTEEM --- */
       :root {
+        /* Hele teema (vaikimisi) */
+        --bg-overlay: rgba(0, 0, 0, 0.6);
         --modal-bg: #ffffff;
         --modal-text: #333333;
         --modal-header-bg: #f8f9fa;
         --modal-border: #eeeeee;
+        
         --input-bg: #ffffff;
         --input-border: #dddddd;
         --input-text: #333333;
+        
         --table-th-bg: #2c3e50;
         --table-th-text: #ffffff;
-        --table-stripe: #fbfbfb;
-        --table-hover: #f1f8ff;
+        --table-row-bg: #ffffff;
+        --table-row-alt: #fbfbfb;
+        --table-row-hover: #f1f8ff;
+        
+        --tab-btn-bg: #e0e0e0;
+        --tab-btn-text: #333333;
+        --tab-active-bg: #3498db;
+        --tab-active-text: #ffffff;
+
         --calc-bg: #f8f9fa;
         --calc-text: #555555;
       }
 
-      /* Tume režiim */
+      /* Tume teema */
       body.dark-mode {
+        --bg-overlay: rgba(0, 0, 0, 0.8);
         --modal-bg: #1e1e1e;
-        --modal-text: #e0e0e0;
+        --modal-text: #f0f0f0;
         --modal-header-bg: #252526;
         --modal-border: #333333;
+        
         --input-bg: #2d2d2d;
         --input-border: #444444;
         --input-text: #ffffff;
+        
         --table-th-bg: #111111;
-        --table-th-text: #cccccc;
-        --table-stripe: #252526;
-        --table-hover: #2a2d2e;
+        --table-th-text: #e0e0e0;
+        --table-row-bg: #1e1e1e;
+        --table-row-alt: #252526;
+        --table-row-hover: #2a2d2e;
+        
+        --tab-btn-bg: #333333;
+        --tab-btn-text: #cccccc;
+        --tab-active-bg: #3498db;
+        --tab-active-text: #ffffff;
+
         --calc-bg: #2d2d2d;
         --calc-text: #cccccc;
       }
 
-      /* --- Modal (Hüpikaken) stiilid --- */
+      /* --- Modal (Hüpikaken) --- */
       .modal-overlay {
         position: fixed;
         top: 0;
         left: 0;
         width: 100%;
         height: 100%;
-        background-color: rgba(0, 0, 0, 0.6);
+        background-color: var(--bg-overlay);
         z-index: 9999;
         display: none;
         justify-content: center;
@@ -62,8 +83,8 @@
       }
 
       .modal-card {
-        background: var(--modal-bg);
-        color: var(--modal-text);
+        background-color: var(--modal-bg) !important; /* Force override */
+        color: var(--modal-text) !important;
         width: 100%;
         max-width: 450px;
         border-radius: 12px;
@@ -88,7 +109,7 @@
       }
 
       .modal-header {
-        background: var(--modal-header-bg);
+        background-color: var(--modal-header-bg) !important;
         padding: 15px 20px;
         border-bottom: 1px solid var(--modal-border);
         display: flex;
@@ -100,7 +121,7 @@
       .modal-header h3 {
         margin: 0;
         font-size: 1.2rem;
-        color: var(--modal-text);
+        color: var(--modal-text) !important;
       }
 
       .close-btn {
@@ -119,12 +140,12 @@
         overflow-y: auto;
       }
 
-      /* --- Kalkulaatori sisemised stiilid --- */
+      /* --- Kalkulaator --- */
       .calc-label {
         display: block;
         margin-bottom: 0.5rem;
         color: var(--modal-text);
-        opacity: 0.8;
+        opacity: 0.9;
         font-weight: 500;
         font-size: 0.9rem;
       }
@@ -132,9 +153,9 @@
         width: 100%;
         padding: 10px;
         margin-bottom: 1.25rem;
-        border: 1px solid var(--input-border);
-        background-color: var(--input-bg);
-        color: var(--input-text);
+        background-color: var(--input-bg) !important;
+        border: 1px solid var(--input-border) !important;
+        color: var(--input-text) !important;
         border-radius: 6px;
         box-sizing: border-box;
         font-size: 16px;
@@ -179,55 +200,70 @@
       }
       .calc-formula {
         font-family: monospace;
-        background: rgba(0,0,0,0.05);
+        background: rgba(128, 128, 128, 0.1);
         padding: 2px 5px;
         border-radius: 3px;
         color: var(--modal-text);
       }
 
-      /* --- Nõuete tabeli stiilid --- */
+      /* --- Nõuete tabel --- */
       .tabs { display: flex; justify-content: center; margin-bottom: 20px; gap: 10px; flex-wrap: wrap; }
       .tab-button {
-          padding: 8px 16px; cursor: pointer; border: none; 
-          background-color: var(--modal-header-bg); 
-          color: var(--modal-text);
-          border: 1px solid var(--modal-border);
+          padding: 8px 16px; cursor: pointer; 
+          border: 1px solid var(--modal-border); 
+          background-color: var(--tab-btn-bg);
+          color: var(--tab-btn-text);
           font-size: 14px; border-radius: 20px; transition: 0.3s; font-weight: 500;
       }
       .tab-button:hover { filter: brightness(90%); }
-      .tab-button.active { background-color: #3498db; color: white; border-color: #3498db; }
+      .tab-button.active { 
+          background-color: var(--tab-active-bg); 
+          color: var(--tab-active-text); 
+          border-color: var(--tab-active-bg);
+      }
 
       .table-container { 
           overflow-x: auto; 
           border-radius: 8px; 
           border: 1px solid var(--modal-border);
+          background-color: var(--table-row-bg);
       }
       .req-table { width: 100%; border-collapse: collapse; min-width: 600px; font-size: 14px; }
+      
       .req-table th { 
-          background-color: var(--table-th-bg); 
-          color: var(--table-th-text); 
+          background-color: var(--table-th-bg) !important; 
+          color: var(--table-th-text) !important; 
           padding: 12px 15px; 
           text-align: left; 
           position: sticky; 
           top: 0; 
           font-weight: 600;
+          z-index: 10;
       }
+      
       .req-table td {
           padding: 12px 15px;
           text-align: left;
           border-bottom: 1px solid var(--modal-border);
           vertical-align: top;
           color: var(--modal-text);
+          background-color: var(--table-row-bg);
       }
-      .req-table tr:nth-child(even) { background-color: var(--table-stripe); }
-      .req-table tr:hover { background-color: var(--table-hover); }
       
-      /* Staatuse märk */
+      /* Triibuline tabel */
+      .req-table tr:nth-child(even) td { 
+          background-color: var(--table-row-alt); 
+      }
+      .req-table tr:hover td { 
+          background-color: var(--table-row-hover); 
+      }
+      
+      /* Staatused */
       .status-badge {
           padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; text-transform: uppercase;
       }
-      .status-false { background-color: rgba(231, 76, 60, 0.2); color: #e74c3c; }
-      .status-true { background-color: rgba(39, 174, 96, 0.2); color: #27ae60; }
+      .status-false { background-color: rgba(231, 76, 60, 0.15); color: #e74c3c; }
+      .status-true { background-color: rgba(39, 174, 96, 0.15); color: #27ae60; }
       
       #req-loader { text-align: center; margin: 20px; color: var(--modal-text); display: none; }
       #req-row-count { text-align: right; margin-bottom: 10px; font-size: 12px; color: var(--calc-text); }
@@ -301,47 +337,38 @@
 
           <section id="revit" data-keywords="revit sheets eksport dwg pdf family">
             <h2 class="section-title">Revit</h2>
-
             <article class="wf-card" data-title="Kiirkäsklused" data-pdf="assets/pdfs/revit/Juhend_Kiirkäsklused.pdf">
               <div class="wf-head"><div class="wf-title">Kiirkäsklused</div><div class="wf-ind">klõpsa, et avada</div></div>
               <div class="wf-body"><div class="pdfwrap"><iframe loading="lazy"></iframe></div></div>
             </article>
-
             <article class="wf-card" data-title="Jooniste nimetamine" data-pdf="assets/pdfs/revit/Juhend_Jooniste_Nimetamine.pdf">
               <div class="wf-head"><div class="wf-title">Jooniste nimetamine</div><div class="wf-ind">klõpsa, et avada</div></div>
               <div class="wf-body"><div class="pdfwrap"><iframe loading="lazy"></iframe></div></div>
             </article>
-
             <article class="wf-card" data-title="Kilbiskeemi lehtede loomine" data-pdf="assets/pdfs/revit/Juhend_KilbiskeemiLehtede_Loomine.pdf">
               <div class="wf-head"><div class="wf-title">Kilbiskeemi lehtede loomine</div><div class="wf-ind">klõpsa, et avada</div></div>
               <div class="wf-body"><div class="pdfwrap"><iframe loading="lazy"></iframe></div></div>
             </article>
-
             <article class="wf-card" data-title="Jooniste printimine" data-pdf="assets/pdfs/revit/Juhend_Jooniste_Printimine.pdf">
               <div class="wf-head"><div class="wf-title">Jooniste printimine</div><div class="wf-ind">klõpsa, et avada</div></div>
               <div class="wf-body"><div class="pdfwrap"><iframe loading="lazy"></iframe></div></div>
             </article>
-
             <article class="wf-card" data-title="Mudeli eksport" data-pdf="assets/pdfs/revit/Juhend_Mudeli_Eksport.pdf">
               <div class="wf-head"><div class="wf-title">Mudeli eksport</div><div class="wf-ind">klõpsa, et avada</div></div>
               <div class="wf-body"><div class="pdfwrap"><iframe loading="lazy"></iframe></div></div>
             </article>
-
             <article class="wf-card" data-title="Versiooni number" data-pdf="assets/pdfs/revit/Juhend_Versiooni_Number.pdf">
               <div class="wf-head"><div class="wf-title">Versiooni number</div><div class="wf-ind">klõpsa, et avada</div></div>
               <div class="wf-body"><div class="pdfwrap"><iframe loading="lazy"></iframe></div></div>
             </article>
-
             <article class="wf-card" data-title="DWG Lisamine vaatele" data-pdf="assets/pdfs/revit/Juhend_DWG_Lisamine_Vaatele.pdf">
               <div class="wf-head"><div class="wf-title">DWG Lisamine vaatele</div><div class="wf-ind">klõpsa, et avada</div></div>
               <div class="wf-body"><div class="pdfwrap"><iframe loading="lazy"></iframe></div></div>
             </article>
-
             <article class="wf-card" data-title="Andmesisu täitmine" data-pdf="assets/pdfs/revit/Juhend_Versiooni_Number.pdf">
-              <div class="wf-head"><div class="wf-title">Andmesisu täitmine</div><div class="wf-ind">klõpsa, et avada</div></div>
-              <div class="wf-body"><div class="pdfwrap"><iframe loading="lazy"></iframe></div></div>
+                <div class="wf-head"><div class="wf-title">Andmesisu täitmine</div><div class="wf-ind">klõpsa, et avada</div></div>
+                <div class="wf-body"><div class="pdfwrap"><iframe loading="lazy"></iframe></div></div>
             </article>
-
             <article class="wf-card" data-title="Mudeli/Projekti loomine" data-pdf="assets/pdfs/revit/Juhend_Mudeli_Loomine.pdf">
               <div class="wf-head"><div class="wf-title">Mudeli/Projekti loomine</div><div class="wf-ind">klõpsa, et avada</div></div>
               <div class="wf-body"><div class="pdfwrap"><iframe loading="lazy"></iframe></div></div>
@@ -354,7 +381,6 @@
               <div class="wf-head"><div class="wf-title">DWG-de liitmine</div><div class="wf-ind">klõpsa, et avada</div></div>
               <div class="wf-body"><div class="pdfwrap"><iframe loading="lazy"></iframe></div></div>
             </article>
-
             <article class="wf-card" data-title="Mitme bloki sisu muutmine" data-pdf="assets/pdfs/autocad/Juhend_AutocadiBlokkideMuutmine.pdf">
               <div class="wf-head"><div class="wf-title">Mitme bloki sisu muutmine</div><div class="wf-ind">klõpsa, et avada</div></div>
               <div class="wf-body"><div class="pdfwrap"><iframe loading="lazy"></iframe></div></div>
@@ -363,17 +389,14 @@
 
           <section id="Üldjuhendid" data-keywords="Üldjuhendid">
             <h2 class="section-title">Üldjuhendid</h2>
-
             <article class="wf-card" data-title="Reviti pluginad" data-pdf="assets/pdfs/windows/Juhend_Reviti_Pluginad.pdf">
               <div class="wf-head"><div class="wf-title">Reviti pluginad</div><div class="wf-ind">klõpsa, et avada</div></div>
               <div class="wf-body"><div class="pdfwrap"><iframe loading="lazy"></iframe></div></div>
             </article>
-
             <article class="wf-card" data-title="Tööarvuti seadistuse juhend" data-pdf="assets/pdfs/windows/Juhend_Arvuti_Seadistamine.pdf">
               <div class="wf-head"><div class="wf-title">Tööarvuti seadistuse juhend</div><div class="wf-ind">klõpsa, et avada</div></div>
               <div class="wf-body"><div class="pdfwrap"><iframe loading="lazy"></iframe></div></div>
             </article>
-
             <article class="wf-card" data-title="Dropboxi kasutamise juhend" data-pdf="assets/pdfs/windows/windows_setup.pdf">
               <div class="wf-head"><div class="wf-title">Dropboxi kasutamise juhend</div><div class="wf-ind">klõpsa, et avada</div></div>
               <div class="wf-body"><div class="pdfwrap"><iframe loading="lazy"></iframe></div></div>
@@ -454,22 +477,37 @@
     <script src="assets/js/app.js"></script>
 
     <script>
-        // --- 0. DARK MODE LOGIC ---
+        // --- 0. DARK MODE LOGIC (Töökindel versioon) ---
         const themeSwitch = document.getElementById('themeSwitch');
         
-        // Kontrolli salvestatud eelistust
-        if (localStorage.getItem('theme') === 'dark') {
-            document.body.classList.add('dark-mode');
-            if(themeSwitch) themeSwitch.checked = true;
+        // Funktsioon teema rakendamiseks
+        function applyTheme(theme) {
+            if (theme === 'dark') {
+                document.body.classList.add('dark-mode');
+                if (themeSwitch) themeSwitch.checked = true;
+            } else {
+                document.body.classList.remove('dark-mode');
+                if (themeSwitch) themeSwitch.checked = false;
+            }
         }
 
+        // 1. Kontrolli salvestatud eelistust laadimisel
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) {
+            applyTheme(savedTheme);
+        } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            // Kui kasutaja arvutis on tume režiim vaikimisi
+            applyTheme('dark');
+        }
+
+        // 2. Kuula lüliti muutust
         if(themeSwitch) {
             themeSwitch.addEventListener('change', function(e) {
                 if (e.target.checked) {
-                    document.body.classList.add('dark-mode');
+                    applyTheme('dark');
                     localStorage.setItem('theme', 'dark');
                 } else {
-                    document.body.classList.remove('dark-mode');
+                    applyTheme('light');
                     localStorage.setItem('theme', 'light');
                 }
             });
@@ -542,7 +580,6 @@
             'pohiprojekt': '1665761150',
             'tooprojekt': '1003177253'
         };
-        // Mida tabelis MITTE näidata
         const COLUMNS_TO_HIDE = ['ID', 'Staadium', 'Staatus', 'Staatus (Jah/Ei)', 'Kommentaar'];
 
         function openRequirements(e) {
@@ -606,10 +643,9 @@
             let skipIndices = []; 
 
             cols.forEach((col, index) => {
-                // Peida tühjad või keelatud veerud
-                if (!col.label || COLUMNS_TO_HIDE.includes(col.label)) {
+                if (col.label && COLUMNS_TO_HIDE.includes(col.label)) {
                     skipIndices.push(index);
-                } else {
+                } else if(col.label) {
                     headRow += `<th>${col.label}</th>`;
                 }
             });
