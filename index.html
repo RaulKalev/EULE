@@ -36,6 +36,15 @@
         position: relative;
         overflow: hidden;
         animation: slideUp 0.3s ease-out;
+        display: flex;
+        flex-direction: column;
+        max-height: 90vh; /* Et ei läheks üle ekraani */
+      }
+
+      /* UUS: Laiem modal tabeli jaoks */
+      .modal-card.large {
+        max-width: 900px;
+        width: 95%;
       }
 
       @keyframes slideUp {
@@ -50,6 +59,7 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
+        flex-shrink: 0;
       }
 
       .modal-header h3 {
@@ -70,6 +80,7 @@
 
       .modal-body {
         padding: 20px;
+        overflow-y: auto; /* Kerimine, kui sisu on pikk */
       }
 
       /* --- Kalkulaatori sisemised stiilid --- */
@@ -132,6 +143,42 @@
         padding: 2px 5px;
         border-radius: 3px;
       }
+
+      /* --- UUS: Nõuete tabeli stiilid --- */
+      .tabs { display: flex; justify-content: center; margin-bottom: 20px; gap: 10px; flex-wrap: wrap; }
+      .tab-button {
+          padding: 8px 16px; cursor: pointer; border: none; background-color: #e0e0e0; 
+          font-size: 14px; border-radius: 20px; transition: 0.3s; font-weight: 500;
+      }
+      .tab-button:hover { background-color: #d0d0d0; }
+      .tab-button.active { background-color: #3498db; color: white; }
+
+      .table-container { 
+          overflow-x: auto; 
+          border-radius: 8px; 
+          border: 1px solid #eee;
+      }
+      .req-table { width: 100%; border-collapse: collapse; min-width: 600px; font-size: 14px; }
+      .req-table th, .req-table td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #ecf0f1; vertical-align: top; }
+      .req-table th { 
+          background-color: #2c3e50; 
+          color: white; 
+          position: sticky; 
+          top: 0; 
+          font-weight: 600;
+      }
+      .req-table tr:nth-child(even) { background-color: #fbfbfb; }
+      
+      /* Staatuse stiilid tabelis */
+      .status-badge {
+          padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; text-transform: uppercase;
+      }
+      .status-false { background-color: #ffebee; color: #c0392b; }
+      .status-true { background-color: #e8f8f5; color: #27ae60; }
+      
+      #req-loader { text-align: center; margin: 20px; color: #666; display: none; }
+      #req-row-count { text-align: right; margin-bottom: 10px; font-size: 12px; color: #999; }
+
     </style>
   </head>
   <body>
@@ -150,6 +197,11 @@
             <a class="side-link" target="_blank" rel="noopener" href="https://tartu.ee/sites/default/files/uploads/Ehitusprojekti%20failide%20vormistamise%20juhend.pdf">EHR faili nimetamise juhend</a>
             <a class="side-link" target="_blank" rel="noopener" href="https://nouded.rkas.ee/">RKAS-i nõuded</a>
             <a class="side-link" target="_blank" rel="noopener" href="https://elektriprojekteerimine.info/">Elektriprojekteerimise juhend</a>
+          </nav>
+
+          <div style="margin-top: 2rem;"></div> <h2 class="side-title">Projekti etappide nõuded</h2>
+          <nav class="side-links">
+            <a class="side-link" href="#" onclick="openRequirements(event)">EN Nõrkvool</a>
           </nav>
 
           <div style="margin-top: 2rem;"></div> <h2 class="side-title">Kalkulaatorid</h2>
@@ -329,22 +381,48 @@
       </div>
     </div>
 
+    <div id="requirementsModal" class="modal-overlay" onclick="closeRequirements(event)">
+        <div class="modal-card large" onclick="event.stopPropagation()">
+          
+          <div class="modal-header">
+            <h3>EN Nõrkvoolu projekti nõuded</h3>
+            <button class="close-btn" onclick="closeRequirements(null)">×</button>
+          </div>
+  
+          <div class="modal-body">
+              <div class="tabs">
+                  <button class="tab-button active" onclick="fetchData('eelprojekt')">Eelprojekt</button>
+                  <button class="tab-button" onclick="fetchData('pohiprojekt')">Põhiprojekt</button>
+                  <button class="tab-button" onclick="fetchData('tooprojekt')">Tööprojekt</button>
+              </div>
+  
+              <div id="req-row-count"></div>
+              <div id="req-loader">Laen andmeid...</div>
+  
+              <div class="table-container">
+                  <table class="req-table" id="req-table">
+                      <thead></thead>
+                      <tbody></tbody>
+                  </table>
+              </div>
+          </div>
+        </div>
+      </div>
+
     <script src="assets/js/app.js"></script>
 
     <script>
-        // --- 1. Akna avamine ja sulgemine ---
+        // --- 1. Kalkulaatori funktsioonid ---
         function openCalculator(e) {
-            e.preventDefault(); // Väldib lehe üles hüppamist lingile vajutades
+            e.preventDefault();
             document.getElementById('calculatorModal').classList.add('active');
-            calculateSiren(); // Arvuta kohe avamisel
+            calculateSiren();
         }
 
         function closeCalculator(e) {
-            // Kui event on olemas (klikk taustal), siis kontrolli, et see poleks sisu
             document.getElementById('calculatorModal').classList.remove('active');
         }
 
-        // --- 2. Arvutusloogika ---
         function calculateSiren() {
             const safetyMargin = 6; 
             
@@ -397,6 +475,112 @@
             document.getElementById('radResult').innerText = rad.toFixed(2) + " m";
             document.getElementById('areaResult').innerText = area.toFixed(2) + " m²";
         }
+
+        // --- 2. UUS: Nõuete modali ja andmete funktsioonid ---
+        
+        // Konfiguratsioon
+        const SHEET_ID = '17akh6UeWbfy0NqJyZxAxcnXBLY5xXAJ4fMbJmsYSe_g'; 
+        const SHEET_GIDS = {
+            'eelprojekt': '0',
+            'pohiprojekt': '1665761150',
+            'tooprojekt': '1003177253'
+        };
+        const COLUMNS_TO_HIDE = ['ID', 'Staadium', 'Staatus', 'Staatus (Jah/Ei)', 'Kommentaar'];
+
+        function openRequirements(e) {
+            e.preventDefault();
+            document.getElementById('requirementsModal').classList.add('active');
+            // Lae andmed esimesel avamisel (vaikimisi eelprojekt)
+            fetchData('eelprojekt');
+        }
+
+        function closeRequirements(e) {
+            document.getElementById('requirementsModal').classList.remove('active');
+        }
+
+        function fetchData(stage) {
+            // UI nupud
+            document.querySelectorAll('#requirementsModal .tab-button').forEach(btn => btn.classList.remove('active'));
+            const clickedBtn = document.querySelector(`#requirementsModal button[onclick="fetchData('${stage}')"]`);
+            if(clickedBtn) clickedBtn.classList.add('active');
+
+            const loader = document.getElementById('req-loader');
+            const tableHead = document.querySelector('#req-table thead');
+            const tableBody = document.querySelector('#req-table tbody');
+            const rowCountDisplay = document.getElementById('req-row-count');
+
+            // Puhasta vaade
+            tableHead.innerHTML = '';
+            tableBody.innerHTML = '';
+            rowCountDisplay.innerText = '';
+            loader.style.display = 'block';
+
+            const gid = SHEET_GIDS[stage];
+            // JSONP päring
+            const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=responseHandler:handleGoogleResponse&gid=${gid}&tq=SELECT *`;
+
+            const oldScript = document.getElementById('gviz-script');
+            if (oldScript) oldScript.remove();
+
+            const script = document.createElement('script');
+            script.setAttribute('src', url);
+            script.setAttribute('id', 'gviz-script');
+            document.body.appendChild(script);
+        }
+
+        // Callback funktsioon Google'i vastuse jaoks
+        window.handleGoogleResponse = function(response) {
+            const loader = document.getElementById('req-loader');
+            const tableHead = document.querySelector('#req-table thead');
+            const tableBody = document.querySelector('#req-table tbody');
+            const rowCountDisplay = document.getElementById('req-row-count');
+            
+            loader.style.display = 'none';
+
+            if (response.status === 'error') {
+                tableBody.innerHTML = '<tr><td>Viga andmete laadimisel.</td></tr>';
+                return;
+            }
+
+            const data = response.table;
+            const cols = data.cols;
+            const rows = data.rows;
+
+            rowCountDisplay.innerText = `Kuvatakse ${rows.length} nõuet`;
+
+            // 1. Päised
+            let headRow = '<tr>';
+            let skipIndices = []; 
+
+            cols.forEach((col, index) => {
+                if (col.label && COLUMNS_TO_HIDE.includes(col.label)) {
+                    skipIndices.push(index);
+                } else if(col.label) {
+                    headRow += `<th>${col.label}</th>`;
+                }
+            });
+            headRow += '</tr>';
+            tableHead.innerHTML = headRow;
+
+            // 2. Sisu
+            let allRowsHTML = ''; 
+
+            rows.forEach(row => {
+                let tr = '<tr>';
+                if (row.c) {
+                    row.c.forEach((cell, index) => {
+                        if (!skipIndices.includes(index)) {
+                            let val = (cell && cell.v !== null) ? cell.v : '';
+                            tr += `<td>${val}</td>`;
+                        }
+                    });
+                }
+                tr += '</tr>';
+                allRowsHTML += tr;
+            });
+
+            tableBody.innerHTML = allRowsHTML;
+        };
     </script>
   </body>
 </html>
